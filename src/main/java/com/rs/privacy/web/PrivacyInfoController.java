@@ -7,10 +7,7 @@ import com.rs.privacy.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -37,6 +34,13 @@ public class PrivacyInfoController {
         List<PrivacyInfo> privacyRules = privacyInfoService.getPrivacyRulesList();
 
         return ResponseUtils.makeResponseEntity(privacyRules, HttpStatus.FOUND);
+    }
+
+    @GetMapping("/rules/{id}")
+    public ResponseEntity<PrivacyInfo> showPrivacyRule(@PathVariable Long id) {
+        PrivacyInfo privacyRule = privacyInfoService.getPrivacyRule(id);
+
+        return ResponseUtils.makeResponseEntity(privacyRule, HttpStatus.FOUND);
     }
 
     @PostMapping("/upload")

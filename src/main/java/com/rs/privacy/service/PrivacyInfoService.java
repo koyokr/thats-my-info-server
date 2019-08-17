@@ -37,4 +37,8 @@ public class PrivacyInfoService {
 
         privacyInfoRepository.save(privacyInfo);
     }
+
+    public PrivacyInfo getPrivacyRule(Long id) {
+        return privacyInfoRepository.findById(id).orElseThrow(RuntimeException::new);
+    }
 }
