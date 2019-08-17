@@ -1,21 +1,34 @@
 package com.rs.privacy.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.sql.Timestamp;
 
 
-@Getter @Setter
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
 public class News {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Column(nullable = false, name = "title", length = 32)
     private String title;
 
-    private String description;
+    @Column(nullable = false, name = "content")
+    @Lob
+    private String content;
+
+    @Column(nullable = false, name = "created_at")
+    private Timestamp createdAt;
+
+    public News(NewsDTO newsDTO) {
+        this.title = newsDTO.getTitle();
+        this.content = newsDTO.getContent();
+    }
 }
