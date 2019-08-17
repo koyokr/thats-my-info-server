@@ -2,6 +2,7 @@ package com.rs.privacy.service;
 
 import com.rs.privacy.model.CategoryType;
 import com.rs.privacy.model.PrivacyInfo;
+import com.rs.privacy.model.PrivacyInfoDTO;
 import com.rs.privacy.repository.PrivacyInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,5 +30,11 @@ public class PrivacyInfoService {
                 .filter(privacyInfo -> privacyInfo.getCategory().equals(CategoryType.PRIVACY_RULES.getViewName())).collect(Collectors.toList());
 
         return privacyRules;
+    }
+
+    public void create(PrivacyInfoDTO privacyInfoDTO) {
+        PrivacyInfo privacyInfo = new PrivacyInfo(privacyInfoDTO);
+
+        privacyInfoRepository.save(privacyInfo);
     }
 }

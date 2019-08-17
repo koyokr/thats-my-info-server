@@ -21,5 +21,12 @@ public class PrivacyInfo {
     private String title;
 
     @Column(nullable = false, name = "content")
+    @Lob
     private String content;
+
+    public PrivacyInfo(PrivacyInfoDTO privacyInfoDTO) {
+        this.category = privacyInfoDTO.getCategory();
+        this.title = privacyInfoDTO.getTitle();
+        this.content = privacyInfoDTO.getContent();
+    }
 }
