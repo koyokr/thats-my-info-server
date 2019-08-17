@@ -3,10 +3,9 @@ package com.rs.privacy.web;
 import com.rs.privacy.model.News;
 import com.rs.privacy.model.NewsDTO;
 import com.rs.privacy.service.NewsService;
+import com.rs.privacy.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,21 +17,25 @@ import java.util.List;
 @RestController
 public class NewsController {
 
+    private final NewsService newsService;
+
     @Autowired
-    private NewsService newsService;
+    public NewsController(NewsService newsService) {
+        this.newsService = newsService;
+    }
 
     @GetMapping("/news")
     public ResponseEntity<List<News>> getNewsList() {
         List<News> newsList = newsService.findList();
 
-        return makeResponseEntity(newsList, HttpStatus.FOUND);
+        return ResponseUtils.makeResponseEntity(newsList, HttpStatus.FOUND);
     }
 
     @GetMapping("/news/{id}")
     public ResponseEntity<News> getNews(@PathVariable Long id) {
         News news = newsService.findNews(id);
 
-        return makeResponseEntity(news, HttpStatus.FOUND);
+        return ResponseUtils.makeResponseEntity(news, HttpStatus.FOUND);
     }
 
     @PostMapping("/news/upload")
@@ -40,20 +43,8 @@ public class NewsController {
 
         newsService.create(newsDTO);
 
-        return makeResponseEntity(HttpStatus.OK);
+        return ResponseUtils.makeResponseEntity(HttpStatus.OK);
     }
 
-    private ResponseEntity<Void> makeResponseEntity(HttpStatus status) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        return new ResponseEntity<>(headers, status);
-    }
-
-    private <T> ResponseEntity<T> makeResponseEntity(T object, HttpStatus status) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        return new ResponseEntity<>(object, headers, status);
-    }
 }
