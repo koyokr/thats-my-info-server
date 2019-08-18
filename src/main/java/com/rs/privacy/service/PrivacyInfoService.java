@@ -26,10 +26,8 @@ public class PrivacyInfoService {
 
     public List<PrivacyInfo> getPrivacyRulesList() {
 
-        List<PrivacyInfo> privacyRules = privacyInfoRepository.findAll().stream()
+       return privacyInfoRepository.findAll().stream()
                 .filter(privacyInfo -> privacyInfo.getCategory().equals(CategoryType.PRIVACY_RULES.getViewName())).collect(Collectors.toList());
-
-        return privacyRules;
     }
 
     public void create(PrivacyInfoDTO privacyInfoDTO) {
@@ -38,7 +36,19 @@ public class PrivacyInfoService {
         privacyInfoRepository.save(privacyInfo);
     }
 
-    public PrivacyInfo getPrivacyRule(Long id) {
+    public PrivacyInfo findById(Long id) {
         return privacyInfoRepository.findById(id).orElseThrow(RuntimeException::new);
+    }
+
+    public List<PrivacyInfo> getPrivacyRulesOfUseList() {
+
+        return privacyInfoRepository.findAll().stream()
+                .filter(privacyInfo -> privacyInfo.getCategory().equals(CategoryType.PRIVACY_RULES_OF_USE.getViewName())).collect(Collectors.toList());
+    }
+
+    public List<PrivacyInfo> getPrivacyRulesCampaignList() {
+
+        return privacyInfoRepository.findAll().stream()
+                .filter(privacyInfo -> privacyInfo.getCategory().equals(CategoryType.PRIVACY_CAMPAIGN.getViewName())).collect(Collectors.toList());
     }
 }
