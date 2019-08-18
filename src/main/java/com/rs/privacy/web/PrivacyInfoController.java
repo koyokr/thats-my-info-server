@@ -38,9 +38,37 @@ public class PrivacyInfoController {
 
     @GetMapping("/rules/{id}")
     public ResponseEntity<PrivacyInfo> showPrivacyRule(@PathVariable Long id) {
-        PrivacyInfo privacyRule = privacyInfoService.getPrivacyRule(id);
+        PrivacyInfo privacyRule = privacyInfoService.findById(id);
 
         return ResponseUtils.makeResponseEntity(privacyRule, HttpStatus.FOUND);
+    }
+
+    @GetMapping("/rules-of-use")
+    public ResponseEntity<List<PrivacyInfo>> showPrivacyRulesOfUse() {
+        List<PrivacyInfo> privacyRulesOfUse = privacyInfoService.getPrivacyRulesOfUseList();
+
+        return ResponseUtils.makeResponseEntity(privacyRulesOfUse, HttpStatus.FOUND);
+    }
+
+    @GetMapping("/rules-of-use/{id}")
+    public ResponseEntity<PrivacyInfo> showPrivacyRuleOfUse(@PathVariable Long id) {
+        PrivacyInfo privacyRuleOfUse = privacyInfoService.findById(id);
+
+        return ResponseUtils.makeResponseEntity(privacyRuleOfUse, HttpStatus.FOUND);
+    }
+
+    @GetMapping("/campaign")
+    public ResponseEntity<List<PrivacyInfo>> showPrivacyCampaigns() {
+        List<PrivacyInfo> privacyCampaigns = privacyInfoService.getPrivacyRulesCampaignList();
+
+        return ResponseUtils.makeResponseEntity(privacyCampaigns, HttpStatus.FOUND);
+    }
+
+    @GetMapping("/campaign/{id}")
+    public ResponseEntity<PrivacyInfo> showPrivacyCampaign(@PathVariable Long id) {
+        PrivacyInfo privacyCampaign = privacyInfoService.findById(id);
+
+        return ResponseUtils.makeResponseEntity(privacyCampaign, HttpStatus.FOUND);
     }
 
     @PostMapping("/upload")
