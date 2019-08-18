@@ -1,6 +1,5 @@
 package com.rs.privacy.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -17,4 +16,10 @@ public class NaverLoginTokenDTO {
 
     @JsonProperty("expires_in")
     private Long expiresIn;
+
+    @JsonProperty("error")
+    private String error;
+
+    @JsonProperty("error_description")
+    private String errorDescription;
 }
