@@ -1,5 +1,6 @@
 package com.rs.privacy.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -7,11 +8,12 @@ import javax.persistence.*;
 
 @Entity
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
 public class PrivacyInfo {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @Column(nullable = false, name = "category")
@@ -20,8 +22,9 @@ public class PrivacyInfo {
     @Column(nullable = false, name = "title")
     private String title;
 
-    @Column(nullable = false, name = "content")
     @Lob
+    @Column(nullable = false, name = "content")
+    @org.hibernate.annotations.Type(type="org.hibernate.type.TextType")
     private String content;
 
     public PrivacyInfo(PrivacyInfoDTO privacyInfoDTO) {

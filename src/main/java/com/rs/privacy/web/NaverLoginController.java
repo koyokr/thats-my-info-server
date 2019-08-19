@@ -1,13 +1,14 @@
 package com.rs.privacy.web;
 
 import com.rs.privacy.model.NaverLoginTokenDTO;
+import com.rs.privacy.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -44,7 +45,7 @@ public class NaverLoginController {
     }
 
     @GetMapping("/callback")
-    public String callback(@RequestParam String code, @RequestParam String state) {
+    public RedirectView callback(@RequestParam String code, @RequestParam String state, RedirectAttributes redirectAttributes) {
         String url = UriComponentsBuilder.fromHttpUrl("https://nid.naver.com/oauth2.0/token")
                 .queryParam("grant_type", "authorization_code")
                 .queryParam("client_id", CLIENT_ID)
@@ -57,8 +58,19 @@ public class NaverLoginController {
         NaverLoginTokenDTO token = restTemplate.getForObject(url, NaverLoginTokenDTO.class);
 
         if (token.getError() != null) {
-            return null;
+            return new RedirectView("./failure");
         }
-        return token.getAccessToken();
+        redirectAttributes.addFlashAttribute("accessToken", token.getAccessToken());
+        return new RedirectView("./success");
+    }
+
+    @GetMapping("/success")
+    public ResponseEntity<String> callback(@ModelAttribute("accessToken") String accessToken) {
+        return ResponseUtils.makeResponseEntity(accessToken, HttpStatus.OK);
+    }
+
+    @GetMapping("/failure")
+    public ResponseEntity<String> callback() {
+        return ResponseUtils.makeResponseEntity(null, HttpStatus.OK);
     }
 }

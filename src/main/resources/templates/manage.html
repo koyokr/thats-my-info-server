@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="kr">
+<head>
+    <meta charset="UTF-8">
+    <title>Privacy Admin Page</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
+</head>
+<body>
+<div class="container">
+    <h1>개인정보 관련 지식 게시글</h1>
+    <p></p>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>번호</th>
+            <th>분류</th>
+            <th>제목</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#privacyInfoList}}
+        <tr align="center" onClick="location.href='/admin/manage/{{id}}'" style="cursor:pointer;">
+            <td>{{id}}</td>
+            <td>{{category}}</td>
+            <td>{{title}}</td>
+        </tr>
+        {{/privacyInfoList}}
+        </tbody>
+    </table>
+    <form method="get" action="/admin/manage/form">
+        <button type="submit" class="btn btn-default pull-right">글쓰기</button>
+    </form>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script type="/text/javascript" src="/js/bootstrap.js"></script>
+</body>
+</html>
