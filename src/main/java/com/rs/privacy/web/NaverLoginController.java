@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -20,7 +21,6 @@ import java.security.SecureRandom;
 public class NaverLoginController {
     private final static String CLIENT_ID = "iiTpSGlHgIkuycXWTh3N";
     private final static String CLIENT_SECRET = "34ZpK2RcPz";
-    private final static String REDIRECT_URI = "http%3A%2F%2Flocalhost%3A8080%2Fnvlogin%2Fcallback";
 
     @Autowired
     RestTemplateBuilder restTemplateBuilder;
@@ -32,11 +32,14 @@ public class NaverLoginController {
 
     @GetMapping("/auth")
     public RedirectView auth() {
+        String redirectUri = ServletUriComponentsBuilder.fromCurrentRequestUri()
+                .replacePath("/nvlogin/callback").build().toUriString();
+
         String state = generateState();
         String url = UriComponentsBuilder.fromHttpUrl("https://nid.naver.com/oauth2.0/authorize")
                 .queryParam("response_type", "code")
                 .queryParam("client_id", CLIENT_ID)
-                .queryParam("redirect_uri", REDIRECT_URI)
+                .queryParam("redirect_uri", redirectUri)
                 .queryParam("state", state)
                 .build().toUriString();
 
