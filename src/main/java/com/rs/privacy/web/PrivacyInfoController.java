@@ -22,6 +22,13 @@ public class PrivacyInfoController {
         this.privacyInfoService = privacyInfoService;
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<PrivacyInfo> showInfo(@PathVariable Long id) {
+        PrivacyInfo privacyInfo = privacyInfoService.findById(id);
+
+        return ResponseUtils.makeResponseEntity(privacyInfo, HttpStatus.FOUND);
+    }
+
     @GetMapping("/privacy-is")
     public ResponseEntity<PrivacyInfo> showPrivacyIs() {
         PrivacyInfo privacyIs = privacyInfoService.getPrivacyIs();
@@ -69,12 +76,5 @@ public class PrivacyInfoController {
         PrivacyInfo privacyCampaign = privacyInfoService.findById(id);
 
         return ResponseUtils.makeResponseEntity(privacyCampaign, HttpStatus.FOUND);
-    }
-
-    @PostMapping("/upload")
-    public ResponseEntity<Void> createPrivacyInfo(PrivacyInfoDTO privacyInfoDTO) {
-        privacyInfoService.create(privacyInfoDTO);
-
-        return ResponseUtils.makeResponseEntity(HttpStatus.OK);
     }
 }

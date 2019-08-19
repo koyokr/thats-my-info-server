@@ -51,4 +51,12 @@ public class PrivacyInfoService {
         return privacyInfoRepository.findAll().stream()
                 .filter(privacyInfo -> privacyInfo.getCategory().equals(CategoryType.PRIVACY_CAMPAIGN.getViewName())).collect(Collectors.toList());
     }
+
+    public List<PrivacyInfo> findAll() {
+        return privacyInfoRepository.findAll();
+    }
+
+    public void delete(Long id) {
+        privacyInfoRepository.deleteById(id);
+    }
 }
