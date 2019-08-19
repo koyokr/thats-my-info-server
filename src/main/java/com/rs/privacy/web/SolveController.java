@@ -1,6 +1,7 @@
 package com.rs.privacy.web;
 
-import com.rs.privacy.model.SolveDTO;
+import com.rs.privacy.model.SiteAdminContactDTO;
+import com.rs.privacy.model.SolveNaverDTO;
 import com.rs.privacy.service.SolveService;
 import com.rs.privacy.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,15 +21,15 @@ public class SolveController {
     }
 
     @PostMapping("/in-naver")
-    public ResponseEntity<Boolean> inNaver(SolveDTO solveDTO) {
-        Boolean success = solveService.inNaver(solveDTO);
+    public ResponseEntity<Boolean> inNaver(SolveNaverDTO solveNaverDTO) {
+        Boolean success = solveService.inNaver(solveNaverDTO);
 
         return ResponseUtils.makeResponseEntity(success, HttpStatus.OK);
     }
 
     @GetMapping("/normal")
-    public ResponseEntity<String> normal(@RequestParam String url) {
-        String contact = solveService.getWhois(url);
+    public ResponseEntity<SiteAdminContactDTO> normal(@RequestParam String url) {
+        SiteAdminContactDTO contact = solveService.getWhois(url);
 
         return ResponseUtils.makeResponseEntity(contact, HttpStatus.OK);
     }

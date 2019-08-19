@@ -5,7 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.rs.privacy.model.SolveDTO;
+import com.rs.privacy.model.SiteAdminContactDTO;
+import com.rs.privacy.model.SolveNaverDTO;
 import org.apache.commons.net.whois.WhoisClient;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -63,13 +64,13 @@ public class SolveService {
         }
     }
 
-    private String getSendData(JsonNode node, SolveDTO solveDTO) {
+    private String getSendData(JsonNode node, SolveNaverDTO solveNaverDTO) {
         ObjectNode content = objectMapper.createObjectNode();
         content.put("content", node.get("content").textValue());
         content.put("status", node.get("status").textValue());
-        content.put("url", solveDTO.getUrl());
+        content.put("url", solveNaverDTO.getUrl());
         content.put("reportReason", "personalInformation");
-        content.put("reportDesc", solveDTO.getDescription());
+        content.put("reportDesc", solveNaverDTO.getDescription());
         content.put("communityYn", "N");
 
         ArrayNode contentList = objectMapper.createArrayNode();
@@ -78,7 +79,7 @@ public class SolveService {
         ObjectNode dataIn = objectMapper.createObjectNode();
         dataIn.put("reportId", "");
         dataIn.put("memberType", "N");
-        dataIn.put("reportEmail", solveDTO.getEmail());
+        dataIn.put("reportEmail", solveNaverDTO.getEmail());
         dataIn.set("contentList", contentList);
 
         try {
@@ -88,7 +89,7 @@ public class SolveService {
         }
     }
 
-    private String getCommonUrls(JsonNode node, SolveDTO solveDTO) {
+    private String getCommonUrls(JsonNode node, SolveNaverDTO solveDTO) {
         ObjectNode dataIn = objectMapper.createObjectNode();
         dataIn.put("key", node.get("key").textValue());
         dataIn.put("url", solveDTO.getUrl());
@@ -111,7 +112,7 @@ public class SolveService {
         }
     }
 
-    public Boolean inNaver(SolveDTO solveDTO) {
+    public Boolean inNaver(SolveNaverDTO solveDTO) {
         RestTemplate restTemplate = restTemplateBuilder.build();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Referer", REFERER_URL);
@@ -205,28 +206,66 @@ public class SolveService {
         return result;
     }
 
-    public String getWhois(String url) {
-        String domain = UriComponentsBuilder.fromHttpUrl(url).build().getHost();
-        StringBuilder result = new StringBuilder();
+    private final static String WHOIS_KISA_URL = "http://xn--c79as89aj0e29b77z.xn--3e0b707e/";
 
-        WhoisClient whois = new WhoisClient();
-        try {
-            whois.connect(WhoisClient.DEFAULT_HOST);
-            String whoisData1 = whois.query("="+domain);
-            result.append(whoisData1);
-            whois.disconnect();
+    private SiteAdminContactDTO getContactFromKr(String domain) {
+        RestTemplate restTemplate = restTemplateBuilder.build();
+        String whoisUrl = UriComponentsBuilder.fromHttpUrl(WHOIS_KISA_URL)
+                .path("/openapi/whois.jsp")
+                .queryParam("query", domain)
+                .queryParam("key", "2019081917144773968679")
+                .queryParam("answer", "json")
+                .build().toUriString();
+        JsonNode node = restTemplate.getForObject(whoisUrl, JsonNode.class)
+                .get("whois").get("krdomain");
 
-            String whoisServerUrl = getWhoisServer(whoisData1);
-            if (whoisServerUrl != null) {
-                String whoisData2 = queryWithWhoisServer(domain, whoisServerUrl);
-                result.append(whoisData2);
-            }
-        } catch (SocketException e) {
-            return null;
-        } catch (IOException e) {
+        SiteAdminContactDTO contact = new SiteAdminContactDTO();
+        contact.setName(node.get("adminName").textValue());
+        contact.setEmail(node.get("adminEmail").textValue());
+        contact.setRegistrar(node.get("agency").textValue());
+        return contact;
+    }
+
+    private SiteAdminContactDTO getContactFromNotKr(String domain) {
+        RestTemplate restTemplate = restTemplateBuilder.build();
+        String whoisUrl = UriComponentsBuilder.fromHttpUrl(WHOIS_KISA_URL)
+                .path("/kor/whois.jsc").build().toUriString();
+        String refererUrl = UriComponentsBuilder.fromHttpUrl(WHOIS_KISA_URL)
+                .path("/kor/whois/whois.jsp").build().toUriString();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/x-www-form-urlencoded");
+        headers.set("Referer", refererUrl);
+
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+        map.add("query", domain);
+        String whoisResult = restTemplate.postForObject(whoisUrl, new HttpEntity<>(map, headers), String.class);
+
+        List<String> emailPatterns = Arrays.asList("Admin Email: (.+)", "Email: (.+)");
+        List<String> phonePatterns = Arrays.asList("Admin Phone: (.+)", "Phone: (.+)");
+
+        Pattern emailPattern = Pattern.compile("Admin Email: (.+)");
+        Matcher matcher = emailPattern.matcher(whoisResult);
+
+        SiteAdminContactDTO contact = new SiteAdminContactDTO();
+        return contact;
+    }
+
+    public SiteAdminContactDTO getWhois(String url) {
+        String host = UriComponentsBuilder.fromHttpUrl(url).build().getHost();
+        Pattern pattern = Pattern.compile("(?:[\\w-]+\\.)?([\\w-]+\\.[\\w-]+)");
+        Matcher matcher = pattern.matcher(host);
+        if (!matcher.find()) {
             return null;
         }
 
-        return result.toString();
+        String domain = matcher.group(1);
+        String tld = domain.split(".")[1];
+
+        if (tld == "kr") {
+            return getContactFromKr(domain);
+        }
+        return getContactFromNotKr(domain);
     }
+
 }
