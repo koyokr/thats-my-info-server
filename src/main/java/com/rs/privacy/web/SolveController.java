@@ -6,9 +6,7 @@ import com.rs.privacy.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/solve")
@@ -21,10 +19,17 @@ public class SolveController {
         this.solveService = solveService;
     }
 
-    @GetMapping("/in-naver")
+    @PostMapping("/in-naver")
     public ResponseEntity<Boolean> inNaver(SolveDTO solveDTO) {
-        Boolean result = solveService.inNaver(solveDTO);
+        Boolean success = solveService.inNaver(solveDTO);
 
-        return ResponseUtils.makeResponseEntity(result, HttpStatus.OK);
+        return ResponseUtils.makeResponseEntity(success, HttpStatus.OK);
+    }
+
+    @GetMapping("/normal")
+    public ResponseEntity<String> normal(@RequestParam String url) {
+        String contact = solveService.getWhois(url);
+
+        return ResponseUtils.makeResponseEntity(contact, HttpStatus.OK);
     }
 }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.rs.privacy.model.SolveDTO;
+import org.apache.commons.net.whois.WhoisClient;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -17,10 +18,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class SolveService {
@@ -29,6 +34,8 @@ public class SolveService {
     private final static String UMON_CHECK_INTERFACE_URL = "https://help.naver.com/support/umon/umonCheckInterface.help";
     private final static String UMON_ADD_INTERFACE_URL = "https://help.naver.com/support/umon/umonAddInterface.help";
     private final static String REPORT_INQUIRY_INSERT_URL = "https://help.naver.com/support/mail/reportInquiryInsert.help";
+
+    private static final String WHOIS_SERVER_PATTERN = "Whois Server:\\s(.*)";
 
     @Autowired
     RestTemplateBuilder restTemplateBuilder;
@@ -168,5 +175,58 @@ public class SolveService {
         String result = restTemplate.postForObject(REPORT_INQUIRY_INSERT_URL, new HttpEntity<>(map, headers), String.class);
 
         return result == "SUCCESS";
+    }
+
+    private String getWhoisServer(String whoisData) {
+        String result = null;
+
+        Pattern pattern = Pattern.compile(WHOIS_SERVER_PATTERN);
+        Matcher matcher = pattern.matcher(whoisData);
+
+        while (matcher.find()) {
+            result = matcher.group(1);
+        }
+        return result;
+    }
+
+    private String queryWithWhoisServer(String domain, String whoisServerUrl) {
+        String result;
+
+        WhoisClient whois = new WhoisClient();
+        try {
+            whois.connect(whoisServerUrl);
+            result = whois.query(domain);
+            whois.disconnect();
+        } catch (SocketException e) {
+            return null;
+        } catch (IOException e) {
+            return null;
+        }
+        return result;
+    }
+
+    public String getWhois(String url) {
+        String domain = UriComponentsBuilder.fromHttpUrl(url).build().getHost();
+        StringBuilder result = new StringBuilder();
+
+        WhoisClient whois = new WhoisClient();
+        try {
+            whois.connect(WhoisClient.DEFAULT_HOST);
+            String whoisData1 = whois.query("="+domain);
+            result.append(whoisData1);
+            whois.disconnect();
+
+            String whoisServerUrl = getWhoisServer(whoisData1);
+            if (whoisServerUrl != null) {
+                String whoisData2 = queryWithWhoisServer(domain, whoisServerUrl);
+                result.append(whoisData2);
+            }
+        } catch (SocketException e) {
+            return null;
+        } catch (IOException e) {
+            return null;
+        }
+
+        return result.toString();
     }
 }
