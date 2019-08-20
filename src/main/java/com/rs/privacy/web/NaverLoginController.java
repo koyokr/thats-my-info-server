@@ -62,11 +62,11 @@ public class NaverLoginController {
         if (token.getError() != null) {
             return new RedirectView("./failure");
         }
-        return new RedirectView("./success;" + token.getAccessToken());
+        return new RedirectView("./success#" + token.getAccessToken());
     }
 
-    @GetMapping("/success;{accessToken}")
-    public ResponseEntity<Void> success(@PathVariable("accessToken") String accessToken) {
+    @GetMapping("/success")
+    public ResponseEntity<Void> success() {
         return ResponseUtils.makeResponseEntity(HttpStatus.OK);
     }
 

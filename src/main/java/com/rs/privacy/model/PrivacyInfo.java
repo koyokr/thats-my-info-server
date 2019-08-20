@@ -32,4 +32,10 @@ public class PrivacyInfo {
         this.title = privacyInfoDTO.getTitle();
         this.content = privacyInfoDTO.getContent();
     }
+
+    public void update(PrivacyInfoDTO privacyInfoDTO) {
+        this.category = privacyInfoDTO.getCategory();
+        this.title = privacyInfoDTO.getTitle();
+        this.content = privacyInfoDTO.getContent();
+    }
 }
