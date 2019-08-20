@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -48,7 +47,7 @@ public class NaverLoginController {
     }
 
     @GetMapping("/callback")
-    public RedirectView callback(@RequestParam String code, @RequestParam String state, RedirectAttributes redirectAttributes) {
+    public RedirectView callback(@RequestParam String code, @RequestParam String state) {
         String url = UriComponentsBuilder.fromHttpUrl("https://nid.naver.com/oauth2.0/token")
                 .queryParam("grant_type", "authorization_code")
                 .queryParam("client_id", CLIENT_ID)
@@ -63,17 +62,16 @@ public class NaverLoginController {
         if (token.getError() != null) {
             return new RedirectView("./failure");
         }
-        redirectAttributes.addFlashAttribute("accessToken", token.getAccessToken());
-        return new RedirectView("./success");
+        return new RedirectView("./success/" + token.getAccessToken());
     }
 
-    @GetMapping("/success")
-    public ResponseEntity<String> callback(@ModelAttribute("accessToken") String accessToken) {
-        return ResponseUtils.makeResponseEntity(accessToken, HttpStatus.OK);
+    @GetMapping("/success/{accessToken}")
+    public ResponseEntity<Void> success(@PathVariable("accessToken") String accessToken) {
+        return ResponseUtils.makeResponseEntity(HttpStatus.OK);
     }
 
     @GetMapping("/failure")
-    public ResponseEntity<String> callback() {
-        return ResponseUtils.makeResponseEntity(null, HttpStatus.OK);
+    public ResponseEntity<Void> failure() {
+        return ResponseUtils.makeResponseEntity(HttpStatus.OK);
     }
 }
