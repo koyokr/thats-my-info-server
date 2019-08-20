@@ -26,7 +26,7 @@ public class PrivacyInfoService {
 
     public List<PrivacyInfo> getPrivacyRulesList() {
 
-       return privacyInfoRepository.findAll().stream()
+        return privacyInfoRepository.findAll().stream()
                 .filter(privacyInfo -> privacyInfo.getCategory().equals(CategoryType.PRIVACY_RULES.getViewName())).collect(Collectors.toList());
     }
 

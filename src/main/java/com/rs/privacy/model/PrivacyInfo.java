@@ -24,7 +24,7 @@ public class PrivacyInfo {
 
     @Lob
     @Column(nullable = false, name = "content")
-    @org.hibernate.annotations.Type(type="org.hibernate.type.TextType")
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.TextType")
     private String content;
 
     public PrivacyInfo(PrivacyInfoDTO privacyInfoDTO) {

@@ -8,11 +8,7 @@ public class HttpSessionUtils {
     public static final String USER_SESSION_KEY = "sessionedUser";
 
     public static boolean isSessionedUser(HttpSession session) {
-        if (session.getAttribute(USER_SESSION_KEY) == null) {
-            return false;
-        }
-
-        return true;
+        return session.getAttribute(USER_SESSION_KEY) != null;
     }
 
     public static AdminInfo getSessionedUser(HttpSession session) {

@@ -1,7 +1,7 @@
 package com.rs.privacy.web;
 
-import com.rs.privacy.model.SearchTokenDTO;
 import com.rs.privacy.model.SearchResult;
+import com.rs.privacy.model.SearchTokenDTO;
 import com.rs.privacy.service.SearchService;
 import com.rs.privacy.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;

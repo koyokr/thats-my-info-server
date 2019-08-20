@@ -31,7 +31,7 @@ public class AdminController {
             return "redirect:/";
         }
 
-       return "index";
+        return "index";
     }
 
     @PostMapping("/login")
@@ -39,7 +39,7 @@ public class AdminController {
         log.debug("adminInfo: {}", adminInfo);
 
 
-        if(adminService.login(session, adminInfo)) {
+        if (adminService.login(session, adminInfo)) {
             return "redirect:/admin/manage";
         }
 
