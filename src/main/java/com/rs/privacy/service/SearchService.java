@@ -1,11 +1,20 @@
 package com.rs.privacy.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.rs.privacy.model.SearchDTO;
 import com.rs.privacy.model.SearchResult;
+import com.rs.privacy.model.SearchTokenDTO;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,6 +23,43 @@ import java.util.List;
 
 @Service
 public class SearchService {
+  
+    @Autowired
+    RestTemplateBuilder restTemplateBuilder;
+
+    public List<SearchResult> search(SearchTokenDTO searchTokenDTO) {
+        SearchDTO searchDTO = getSearchDTO(searchTokenDTO);
+
+        // TODO: crawl
+
+        return null;
+    }
+
+    private SearchDTO getSearchDTO(SearchTokenDTO searchTokenDTO) {
+        String url = "https://openapi.naver.com/v1/nid/me";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + searchTokenDTO.getAccessToken());
+        HttpEntity entity = new HttpEntity(headers);
+
+        RestTemplate restTemplate = restTemplateBuilder.build();
+        JsonNode node = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class).getBody();
+
+        String resultCode = node.get("resultcode").textValue();
+        if (!resultCode.equals("00")) {
+            return null;
+        }
+        JsonNode response = node.get("response");
+
+        return new SearchDTO(
+                searchTokenDTO.getNaverId(),
+                searchTokenDTO.getPhone(),
+                response.get("name").textValue(),
+                response.get("email").textValue(),
+                response.get("nickname").textValue()
+        );
+    }
+
     public SearchResult crawlBing(String id) {
         String url = "https://www.bing.com/search?q=" + id;
 
@@ -365,15 +411,6 @@ public class SearchService {
         return result;
     }
 
-
-    private Document getDocument(String url) {
-        try {
-            return Jsoup.connect(url).get();
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
     public SearchResult crawlNaverSearch(String id) {
         String url = "https://search.naver.com/search.naver?where=article&sm=tab_jum&query=" + id + "&qvt=0";
 
@@ -453,5 +490,13 @@ public class SearchService {
 
         result.setContents(contents);
         return result;
+    }
+
+    private Document getDocument(String url) {
+        try {
+            return Jsoup.connect(url).get();
+        } catch (IOException e) {
+            return null;
+        }
     }
 }
