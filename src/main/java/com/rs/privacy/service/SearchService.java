@@ -81,10 +81,12 @@ public class SearchService {
 
     private SearchResult crawlBing(String id) {
         String url = "https://www.bing.com/search?q=" + id;
+        List<String> contents = new ArrayList<>();
 
         SearchResult result = new SearchResult();
         result.setSiteName("빙 검색");
         result.setUrl(url);
+        result.setContents(contents);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -95,23 +97,23 @@ public class SearchService {
         Iterator<Element> date = element.select("li.b_algo h2").iterator();
         Iterator<Element> content = element.select("div.b_caption p").iterator();
 
-        List<String> contents = new ArrayList<>();
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element contentElement = content.next();
             contents.add(dateElement.text() + " " + contentElement.text());
         }
 
-        result.setContents(contents);
         return result;
     }
 
     private SearchResult crawlClien(String id) {
         String url = "https://www.clien.net/service/search?q=" + id;
+        List<String> contents = new ArrayList<>();
 
         SearchResult result = new SearchResult();
         result.setSiteName("클리앙");
         result.setUrl(url);
+        result.setContents(contents);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -122,100 +124,106 @@ public class SearchService {
         Iterator<Element> date = element.select(".list_time").iterator();
         Iterator<Element> title = element.select(".list_title.oneline").iterator();
 
-        List<String> contents = new ArrayList<>();
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element titleElement = title.next();
             contents.add(dateElement.text() + " " + titleElement.text());
         }
 
-        result.setContents(contents);
         return result;
     }
 
     private SearchResult crawlDaumCafe(String id) {
         String url = "http://search.daum.net/search?w=cafe&nil_search=btn&DA=NTB&enc=utf8&ASearchType=1&lpp=10&rlang=0&q=" + id;
+        List<String> contents = new ArrayList<>();
 
         SearchResult result = new SearchResult();
         result.setSiteName("다음 카페");
         result.setUrl(url);
+        result.setContents(contents);
+
 
         Document doc = getDocument(url);
         if (doc == null) {
             return result;
         }
 
-        Element element = doc.selectFirst("div.cont_inner");
+        Element element = doc.selectFirst("#cafeResultUL");
+        if (element == null) {
+            return result;
+        }
         Iterator<Element> date = element.select(".f_nb.date").iterator();
         Iterator<Element> title = element.select(".wrap_tit.mg_tit").iterator();
 
-        List<String> contents = new ArrayList<>();
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element titleElement = title.next();
             contents.add(dateElement.text() + " " + titleElement.text());
         }
 
-        result.setContents(contents);
         return result;
     }
 
     private SearchResult crawlDaumPaper(String id) {
         String url = "http://search.daum.net/search?w=web&nil_search=btn&DA=NTB&enc=utf8&lpp=10&q=" + id;
+        List<String> contents = new ArrayList<>();
 
         SearchResult result = new SearchResult();
         result.setSiteName("다음 웹문서 검색");
         result.setUrl(url);
+        result.setContents(contents);
 
         Document doc = getDocument(url);
         if (doc == null) {
             return result;
         }
 
-        Element element = doc.selectFirst("div.cont_inner");
+        Element element = doc.selectFirst("#webdocColl");
         Iterator<Element> title = element.select(".f_eb.desc").iterator();
 
-        List<String> contents = new ArrayList<>();
         while (title.hasNext()) {
             Element contentElement = title.next();
             contents.add(contentElement.text());
         }
 
-        result.setContents(contents);
         return result;
     }
 
     private SearchResult crawlDaumSite(String id) {
         String url = "http://search.daum.net/search?w=site&nil_search=btn&DA=NTB&enc=utf8&lpp=10&q=" + id;
+        List<String> contents = new ArrayList<>();
 
         SearchResult result = new SearchResult();
         result.setSiteName("다음 웹사이트 검색");
         result.setUrl(url);
+        result.setContents(contents);
 
         Document doc = getDocument(url);
         if (doc == null) {
             return result;
         }
 
-        Element element = doc.selectFirst("div.cont_inner");
+        Element element = doc.selectFirst("#siteColl");
         Iterator<Element> content = element.select("div.cont_inner").iterator();
+        Iterator<Element> fUrl = element.select(".f_url").iterator();
 
-        List<String> contents = new ArrayList<>();
         while (content.hasNext()) {
             Element contentElement = content.next();
-            contents.add(contentElement.text());
+            Element fUrlElement = fUrl.next();
+            contents.add(contentElement.text() + " " + fUrlElement.text());
         }
 
-        result.setContents(contents);
         return result;
     }
 
     private SearchResult crawlDC(String id) {
         String url = "https://gallog.dcinside.com/" + id;
+        List<String> contents = new ArrayList<>();
 
         SearchResult result = new SearchResult();
         result.setSiteName("디시인사이드");
         result.setUrl(url);
+        result.setContents(contents);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -227,7 +235,6 @@ public class SearchService {
         Iterator<Element> cb2 = element.select("div.cont.box2").iterator();
         Iterator<Element> cb3 = element.select("div.cont.box3 .date").iterator();
 
-        List<String> contents = new ArrayList<>();
         while (cb3.hasNext()) {
             Element dateElement = cb3.next();
             Element titleElement = cb1.next();
@@ -235,16 +242,17 @@ public class SearchService {
             contents.add(dateElement.text() + " " + titleElement.text() + " " + contentElement.text());
         }
 
-        result.setContents(contents);
         return result;
     }
 
     private SearchResult crawlIlbe(String id) {
         String url = "http://www.ilbe.com/list/ilbe?searchType=nick_name&search=" + id;
+        List<String> contents = new ArrayList<>();
 
         SearchResult result = new SearchResult();
         result.setSiteName("일베");
         result.setUrl(url);
+        result.setContents(contents);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -261,7 +269,6 @@ public class SearchService {
         List<String> crawlDate = new ArrayList<>();
         List<String> crawlContent = new ArrayList<>();
 
-        List<String> contents = new ArrayList<>();
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element contentElement = content.next();
@@ -276,16 +283,17 @@ public class SearchService {
             contents.add(dateElement.text() + " " + contentElement.text());
         }
 
-        result.setContents(contents);
         return result;
     }
 
     private SearchResult crawlNateCafe(String id) {
         String url = "https://search.daum.net/nate?w=cafe&nil_search=btn&DA=NTB&enc=utf8&ASearchType=1&lpp=10&rlang=0&q=" + id;
+        List<String> contents = new ArrayList<>();
 
         SearchResult result = new SearchResult();
         result.setSiteName("네이트 카페");
         result.setUrl(url);
+        result.setContents(contents);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -297,7 +305,6 @@ public class SearchService {
         Iterator<Element> cb2 = element.select(".f_eb.desc").iterator();
         Iterator<Element> cb3 = element.select(".f_nb.date").iterator();
 
-        List<String> contents = new ArrayList<>();
         while (cb3.hasNext()) {
             Element dateElement = cb3.next();
             Element titleElement = cb1.next();
@@ -305,59 +312,58 @@ public class SearchService {
             contents.add(dateElement.text() + " " + titleElement.text() + " " + contentElement.text());
         }
 
-        result.setContents(contents);
         return result;
     }
 
     private SearchResult crawlNatePaper(String id) {
         String url = "https://search.daum.net/nate?w=web&nil_search=btn&DA=NTB&enc=utf8&lpp=10&q=" + id;
+        List<String> contents = new ArrayList<>();
 
         SearchResult result = new SearchResult();
         result.setSiteName("네이트 웹문서 검색");
         result.setUrl(url);
+        result.setContents(contents);
 
         Document doc = getDocument(url);
         if (doc == null) {
             return result;
         }
 
-        Element element = doc.selectFirst(".list_info.clear");
+        Element element = doc.selectFirst("#webdocColl");
         Iterator<Element> content = element.select(".f_eb.desc").iterator();
 
-        List<String> contents = new ArrayList<>();
         while (content.hasNext()) {
             Element titleElement = content.next();
             contents.add(titleElement.text());
         }
 
-        result.setContents(contents);
         return result;
     }
 
     private SearchResult crawlNateSite(String id) {
         String url = "https://search.daum.net/nate?w=site&nil_search=btn&DA=NTB&enc=utf8&lpp=10&q=" + id;
+        List<String> contents = new ArrayList<>();
 
         SearchResult result = new SearchResult();
         result.setSiteName("네이트 웹사이트 검색");
         result.setUrl(url);
+        result.setContents(contents);
 
         Document doc = getDocument(url);
         if (doc == null) {
             return result;
         }
 
-        Element element = doc.selectFirst(".list_info.clear");
-        Iterator<Element> date = element.select(".f_nb").iterator();
+        Element element = doc.selectFirst("#siteColl");
+        Iterator<Element> content = element.select("div.cont_inner").iterator();
         Iterator<Element> fUrl = element.select(".f_url").iterator();
 
-        List<String> contents = new ArrayList<>();
-        while (date.hasNext()) {
-            Element dateElement = date.next();
+        while (content.hasNext()) {
+            Element contentElement = content.next();
             Element urlElement = fUrl.next();
-            contents.add(dateElement.text() + " " + urlElement.text());
+            contents.add(contentElement.text() + " " + urlElement.text());
         }
 
-        result.setContents(contents);
         return result;
     }
 
@@ -365,16 +371,14 @@ public class SearchService {
         // String[] clubID = {"22830216", "10050146", "10050813", "11262350"};
         String url = "https://m.cafe.naver.com/ArticleSearchList.nhn?" +
                 "search.query=" + id +
-                "&search.menuid=" +
-                "&search.searchBy=3" +
-                "&search.sortBy=date" +
-                "&search.clubid=" + clubId +
-                "&search.option=0" +
-                "&search.defaultValue=1";
+                "&search.menuid=&search.searchBy=3&search.sortBy=date&search.clubid=" + clubId +
+                "&search.option=0&search.defaultValue=1";
+        List<String> contents = new ArrayList<>();
 
         SearchResult result = new SearchResult();
         result.setSiteName("네이버 카페");
         result.setUrl(url);
+        result.setContents(contents);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -382,10 +386,12 @@ public class SearchService {
         }
 
         Element element = doc.selectFirst("#articleList");
+        if (element == null) {
+            return result;
+        }
         Iterator<Element> date = element.select(".time").iterator();
         Iterator<Element> title = element.select("div.post_area").iterator();
 
-        List<String> contents = new ArrayList<>();
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element titleElement = title.next();
@@ -396,16 +402,17 @@ public class SearchService {
             contents.add(dateElement.text() + " " + titleElement.text());
         }
 
-        result.setContents(contents);
         return result;
     }
 
     private SearchResult crawlNaverKin(String id) {
         String url = "https://kin.naver.com/profile/" + id;
+        List<String> contents = new ArrayList<>();
 
         SearchResult result = new SearchResult();
         result.setSiteName("네이버 지식인");
         result.setUrl(url);
+        result.setContents(contents);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -413,11 +420,13 @@ public class SearchService {
         }
 
         Element element = doc.selectFirst("tbody");
+        if (element == null) {
+            return result;
+        }
         Iterator<Element> date = element.select("td.t_num.tc").iterator();
         Iterator<Element> contentQ = element.select("dt").iterator();
         Iterator<Element> contentA = element.select("dd").iterator();
 
-        List<String> contents = new ArrayList<>();
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element contentElementQ = contentQ.next();
@@ -425,16 +434,17 @@ public class SearchService {
             contents.add(dateElement.text() + " Q:" + contentElementQ.text() + " A:" + contentElementA.text());
         }
 
-        result.setContents(contents);
         return result;
     }
 
     private SearchResult crawlNaverSearch(String id) {
         String url = "https://search.naver.com/search.naver?where=article&sm=tab_jum&query=" + id + "&qvt=0";
+        List<String> contents = new ArrayList<>();
 
         SearchResult result = new SearchResult();
         result.setSiteName("네이버 검색");
         result.setUrl(url);
+        result.setContents(contents);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -442,11 +452,13 @@ public class SearchService {
         }
 
         Element element = doc.selectFirst("#elThumbnailResultArea");
+        if (element == null) {
+            return result;
+        }
         Iterator<Element> date = element.select(".txt_inline").iterator();
         Iterator<Element> title = element.select(".sh_cafe_title").iterator();
         Iterator<Element> content = element.select(".sh_cafe_passage").iterator();
 
-        List<String> contents = new ArrayList<>();
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element titleElement = title.next();
@@ -454,16 +466,17 @@ public class SearchService {
             contents.add(dateElement.text() + " " + titleElement.text() + " " + contentElement.text());
         }
 
-        result.setContents(contents);
         return result;
     }
 
     private SearchResult crawlTodayHumor(String id) {
         String url = "http://www.todayhumor.co.kr/board/list.php?kind=search&keyfield=name&keyword=" + id + "&Submit.x=0&Submit.y=0";
+        List<String> contents = new ArrayList<>();
 
         SearchResult result = new SearchResult();
         result.setSiteName("오늘의유머");
         result.setUrl(url);
+        result.setContents(contents);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -474,23 +487,23 @@ public class SearchService {
         Iterator<Element> date = element.select("td.date").iterator();
         Iterator<Element> content = element.select(".subject a").iterator();
 
-        List<String> contents = new ArrayList<>();
         while (content.hasNext()) {
             Element dateElement = date.next();
             Element contentElement = content.next();
             contents.add(dateElement.text() + " " + contentElement.text());
         }
 
-        result.setContents(contents);
         return result;
     }
 
     private SearchResult crawlTwitter(String id) {
         String url = "https://twitter.com/" + id;
+        List<String> contents = new ArrayList<>();
 
         SearchResult result = new SearchResult();
         result.setSiteName("트위터");
         result.setUrl(url);
+        result.setContents(contents);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -500,13 +513,11 @@ public class SearchService {
         Element element = doc.selectFirst("div.js-tweet-text-container");
         Iterator<Element> content = element.select("div.js-tweet-text-container").iterator();
 
-        List<String> contents = new ArrayList<>();
         while (content.hasNext()) {
             Element contentElement = content.next();
             contents.add(contentElement.text());
         }
 
-        result.setContents(contents);
         return result;
     }
 
