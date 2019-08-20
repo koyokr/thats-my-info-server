@@ -6,6 +6,7 @@ import com.rs.privacy.utils.HttpSessionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
@@ -17,13 +18,16 @@ public class AdminService {
     @Autowired
     private AdminInfoRepository adminInfoRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public boolean login(HttpSession session, AdminInfo adminInfo) {
         AdminInfo savedAdminInfo = adminInfoRepository.findById(adminInfo.getId()).orElseThrow(RuntimeException::new);
 
         log.debug("adminInfo : {}", savedAdminInfo);
 
-        if (savedAdminInfo.matchPassword(adminInfo)) {
-            session.setAttribute(HttpSessionUtils.USER_SESSION_KEY, adminInfo);
+        if (passwordEncoder.matches(adminInfo.getPw(), savedAdminInfo.getPw())) {
+            session.setAttribute(HttpSessionUtils.USER_SESSION_KEY, savedAdminInfo);
 
             return true;
         }
