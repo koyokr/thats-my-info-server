@@ -23,16 +23,35 @@ import java.util.List;
 
 @Service
 public class SearchService {
-  
+
     @Autowired
     RestTemplateBuilder restTemplateBuilder;
 
     public List<SearchResult> search(SearchTokenDTO searchTokenDTO) {
         SearchDTO searchDTO = getSearchDTO(searchTokenDTO);
+        String id = searchDTO.getNaverId();
 
-        // TODO: crawl
+        List<SearchResult> resultList = new ArrayList<>();
+        resultList.add(crawlBing(id));
+        resultList.add(crawlClien(id));
+        resultList.add(crawlDaumCafe(id));
+        resultList.add(crawlDaumPaper(id));
+        resultList.add(crawlDaumSite(id));
+        resultList.add(crawlDC(id));
+        resultList.add(crawlIlbe(id));
+        resultList.add(crawlNateCafe(id));
+        resultList.add(crawlNatePaper(id));
+        resultList.add(crawlNateSite(id));
+        resultList.add(crawlNaverCafe(id, "22830216"));
+        resultList.add(crawlNaverCafe(id, "10050146"));
+        resultList.add(crawlNaverCafe(id, "10050813"));
+        resultList.add(crawlNaverCafe(id, "11262350"));
+        resultList.add(crawlNaverKin(id));
+        resultList.add(crawlNaverSearch(id));
+        resultList.add(crawlTodayHumor(id));
+        resultList.add(crawlTwitter(id));
 
-        return null;
+        return resultList;
     }
 
     private SearchDTO getSearchDTO(SearchTokenDTO searchTokenDTO) {
@@ -60,7 +79,7 @@ public class SearchService {
         );
     }
 
-    public SearchResult crawlBing(String id) {
+    private SearchResult crawlBing(String id) {
         String url = "https://www.bing.com/search?q=" + id;
 
         SearchResult result = new SearchResult();
@@ -72,22 +91,22 @@ public class SearchService {
             return result;
         }
 
-        Elements element = doc.select("div");
+        Element element = doc.selectFirst("div");
         Iterator<Element> date = element.select("li.b_algo h2").iterator();
-        Iterator<Element> contentQ = element.select("div.b_caption p").iterator();
+        Iterator<Element> content = element.select("div.b_caption p").iterator();
 
         List<String> contents = new ArrayList<>();
         while (date.hasNext()) {
             Element dateElement = date.next();
-            Element contentElementQ = contentQ.next();
-            contents.add(dateElement.text() + " " + contentElementQ.text());
+            Element contentElement = content.next();
+            contents.add(dateElement.text() + " " + contentElement.text());
         }
 
         result.setContents(contents);
         return result;
     }
 
-    public SearchResult crawlClien(String id) {
+    private SearchResult crawlClien(String id) {
         String url = "https://www.clien.net/service/search?q=" + id;
 
         SearchResult result = new SearchResult();
@@ -99,7 +118,7 @@ public class SearchService {
             return result;
         }
 
-        Elements element = doc.select("div");
+        Element element = doc.selectFirst("div");
         Iterator<Element> date = element.select(".list_time").iterator();
         Iterator<Element> title = element.select(".list_title.oneline").iterator();
 
@@ -114,7 +133,7 @@ public class SearchService {
         return result;
     }
 
-    public SearchResult crawlDaumCafe(String id) {
+    private SearchResult crawlDaumCafe(String id) {
         String url = "http://search.daum.net/search?w=cafe&nil_search=btn&DA=NTB&enc=utf8&ASearchType=1&lpp=10&rlang=0&q=" + id;
 
         SearchResult result = new SearchResult();
@@ -126,16 +145,14 @@ public class SearchService {
             return result;
         }
 
-        Elements element = doc.select("div.cont_inner");
+        Element element = doc.selectFirst("div.cont_inner");
         Iterator<Element> date = element.select(".f_nb.date").iterator();
         Iterator<Element> title = element.select(".wrap_tit.mg_tit").iterator();
-
 
         List<String> contents = new ArrayList<>();
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element titleElement = title.next();
-
             contents.add(dateElement.text() + " " + titleElement.text());
         }
 
@@ -143,7 +160,7 @@ public class SearchService {
         return result;
     }
 
-    public SearchResult crawlDaumPaper(String id) {
+    private SearchResult crawlDaumPaper(String id) {
         String url = "http://search.daum.net/search?w=web&nil_search=btn&DA=NTB&enc=utf8&lpp=10&q=" + id;
 
         SearchResult result = new SearchResult();
@@ -155,9 +172,8 @@ public class SearchService {
             return result;
         }
 
-        Elements element = doc.select("div.cont_inner");
+        Element element = doc.selectFirst("div.cont_inner");
         Iterator<Element> title = element.select(".f_eb.desc").iterator();
-
 
         List<String> contents = new ArrayList<>();
         while (title.hasNext()) {
@@ -169,7 +185,7 @@ public class SearchService {
         return result;
     }
 
-    public SearchResult crawlDaumSite(String id) {
+    private SearchResult crawlDaumSite(String id) {
         String url = "http://search.daum.net/search?w=site&nil_search=btn&DA=NTB&enc=utf8&lpp=10&q=" + id;
 
         SearchResult result = new SearchResult();
@@ -181,7 +197,7 @@ public class SearchService {
             return result;
         }
 
-        Elements element = doc.select("div.cont_inner");
+        Element element = doc.selectFirst("div.cont_inner");
         Iterator<Element> content = element.select("div.cont_inner").iterator();
 
         List<String> contents = new ArrayList<>();
@@ -194,7 +210,7 @@ public class SearchService {
         return result;
     }
 
-    public SearchResult crawlDC(String id) {
+    private SearchResult crawlDC(String id) {
         String url = "https://gallog.dcinside.com/" + id;
 
         SearchResult result = new SearchResult();
@@ -206,7 +222,7 @@ public class SearchService {
             return result;
         }
 
-        Elements element = doc.select("#container");
+        Element element = doc.selectFirst("#container");
         Iterator<Element> cb1 = element.select("div.cont.box1").iterator();
         Iterator<Element> cb2 = element.select("div.cont.box2").iterator();
         Iterator<Element> cb3 = element.select("div.cont.box3 .date").iterator();
@@ -223,7 +239,7 @@ public class SearchService {
         return result;
     }
 
-    public SearchResult crawlIlbe(String id) {
+    private SearchResult crawlIlbe(String id) {
         String url = "http://www.ilbe.com/list/ilbe?searchType=nick_name&search=" + id;
 
         SearchResult result = new SearchResult();
@@ -235,7 +251,10 @@ public class SearchService {
             return result;
         }
 
-        Elements element = doc.select(".board-body");
+        Element element = doc.selectFirst(".board-body");
+        element.select(".title-line").remove();
+        element.select(".notice-line").remove();
+        element.select(".ad-line").remove();
         Iterator<Element> date = element.select(".date").iterator();
         Iterator<Element> content = element.select(".subject").iterator();
 
@@ -261,7 +280,7 @@ public class SearchService {
         return result;
     }
 
-    public SearchResult crawlNateCafe(String id) {
+    private SearchResult crawlNateCafe(String id) {
         String url = "https://search.daum.net/nate?w=cafe&nil_search=btn&DA=NTB&enc=utf8&ASearchType=1&lpp=10&rlang=0&q=" + id;
 
         SearchResult result = new SearchResult();
@@ -273,7 +292,7 @@ public class SearchService {
             return result;
         }
 
-        Elements element = doc.select("div.coll_cont");
+        Element element = doc.selectFirst("div.coll_cont");
         Iterator<Element> cb1 = element.select(".wrap_tit.mg_tit").iterator();
         Iterator<Element> cb2 = element.select(".f_eb.desc").iterator();
         Iterator<Element> cb3 = element.select(".f_nb.date").iterator();
@@ -290,7 +309,7 @@ public class SearchService {
         return result;
     }
 
-    public SearchResult crawlNatePaper(String id) {
+    private SearchResult crawlNatePaper(String id) {
         String url = "https://search.daum.net/nate?w=web&nil_search=btn&DA=NTB&enc=utf8&lpp=10&q=" + id;
 
         SearchResult result = new SearchResult();
@@ -302,13 +321,12 @@ public class SearchService {
             return result;
         }
 
-        Elements element = doc.select(".list_info.clear");
+        Element element = doc.selectFirst(".list_info.clear");
         Iterator<Element> content = element.select(".f_eb.desc").iterator();
 
         List<String> contents = new ArrayList<>();
         while (content.hasNext()) {
             Element titleElement = content.next();
-
             contents.add(titleElement.text());
         }
 
@@ -316,7 +334,7 @@ public class SearchService {
         return result;
     }
 
-    public SearchResult crawlNateSite(String id) {
+    private SearchResult crawlNateSite(String id) {
         String url = "https://search.daum.net/nate?w=site&nil_search=btn&DA=NTB&enc=utf8&lpp=10&q=" + id;
 
         SearchResult result = new SearchResult();
@@ -328,7 +346,7 @@ public class SearchService {
             return result;
         }
 
-        Elements element = doc.select(".list_info.clear");
+        Element element = doc.selectFirst(".list_info.clear");
         Iterator<Element> date = element.select(".f_nb").iterator();
         Iterator<Element> fUrl = element.select(".f_url").iterator();
 
@@ -343,7 +361,7 @@ public class SearchService {
         return result;
     }
 
-    public SearchResult crawlNaverCafe(String id, String clubId) {
+    private SearchResult crawlNaverCafe(String id, String clubId) {
         // String[] clubID = {"22830216", "10050146", "10050813", "11262350"};
         String url = "https://m.cafe.naver.com/ArticleSearchList.nhn?" +
                 "search.query=" + id +
@@ -363,7 +381,7 @@ public class SearchService {
             return result;
         }
 
-        Elements element = doc.select("#articleList");
+        Element element = doc.selectFirst("#articleList");
         Iterator<Element> date = element.select(".time").iterator();
         Iterator<Element> title = element.select("div.post_area").iterator();
 
@@ -382,7 +400,7 @@ public class SearchService {
         return result;
     }
 
-    public SearchResult crawlNaverKin(String id) {
+    private SearchResult crawlNaverKin(String id) {
         String url = "https://kin.naver.com/profile/" + id;
 
         SearchResult result = new SearchResult();
@@ -394,7 +412,7 @@ public class SearchService {
             return result;
         }
 
-        Elements element = doc.select("tbody");
+        Element element = doc.selectFirst("tbody");
         Iterator<Element> date = element.select("td.t_num.tc").iterator();
         Iterator<Element> contentQ = element.select("dt").iterator();
         Iterator<Element> contentA = element.select("dd").iterator();
@@ -411,7 +429,7 @@ public class SearchService {
         return result;
     }
 
-    public SearchResult crawlNaverSearch(String id) {
+    private SearchResult crawlNaverSearch(String id) {
         String url = "https://search.naver.com/search.naver?where=article&sm=tab_jum&query=" + id + "&qvt=0";
 
         SearchResult result = new SearchResult();
@@ -423,7 +441,7 @@ public class SearchService {
             return result;
         }
 
-        Elements element = doc.select("#elThumbnailResultArea");
+        Element element = doc.selectFirst("#elThumbnailResultArea");
         Iterator<Element> date = element.select(".txt_inline").iterator();
         Iterator<Element> title = element.select(".sh_cafe_title").iterator();
         Iterator<Element> content = element.select(".sh_cafe_passage").iterator();
@@ -440,11 +458,11 @@ public class SearchService {
         return result;
     }
 
-    public SearchResult crawlTodayHumor(String id) {
+    private SearchResult crawlTodayHumor(String id) {
         String url = "http://www.todayhumor.co.kr/board/list.php?kind=search&keyfield=name&keyword=" + id + "&Submit.x=0&Submit.y=0";
 
         SearchResult result = new SearchResult();
-        result.setSiteName("네이버 검색");
+        result.setSiteName("오늘의유머");
         result.setUrl(url);
 
         Document doc = getDocument(url);
@@ -452,7 +470,7 @@ public class SearchService {
             return result;
         }
 
-        Elements element = doc.select("tbody");
+        Element element = doc.selectFirst("tbody");
         Iterator<Element> date = element.select("td.date").iterator();
         Iterator<Element> content = element.select(".subject a").iterator();
 
@@ -467,11 +485,11 @@ public class SearchService {
         return result;
     }
 
-    public SearchResult crawlTwitter(String id) {
+    private SearchResult crawlTwitter(String id) {
         String url = "https://twitter.com/" + id;
 
         SearchResult result = new SearchResult();
-        result.setSiteName("네이버 검색");
+        result.setSiteName("트위터");
         result.setUrl(url);
 
         Document doc = getDocument(url);
@@ -479,7 +497,7 @@ public class SearchService {
             return result;
         }
 
-        Elements element = doc.select("div.js-tweet-text-container");
+        Element element = doc.selectFirst("div.js-tweet-text-container");
         Iterator<Element> content = element.select("div.js-tweet-text-container").iterator();
 
         List<String> contents = new ArrayList<>();
