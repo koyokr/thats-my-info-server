@@ -3,8 +3,8 @@ package com.rs.privacy.model;
 import lombok.Getter;
 
 @Getter
-public class ClientInfoDTO {
+public class SearchWithTokenDTO {
     private String naverId;
-    private String phoneNum;
+    private String phone;
     private String accessToken;
 }

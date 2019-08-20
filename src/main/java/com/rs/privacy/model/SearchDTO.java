@@ -9,10 +9,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PersonalInfoDTO {
-    private String name;
-    private int birth;
-    private String phoneNumber;
-    private String school;
+public class SearchDTO {
     private String naverId;
+    private String phone;
+    private String name;
+    private String email;
+    private String nickname;
 }
