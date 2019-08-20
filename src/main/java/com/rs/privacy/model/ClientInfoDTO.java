@@ -6,5 +6,5 @@ import lombok.Getter;
 public class ClientInfoDTO {
     private String naverId;
     private String phoneNum;
-    private String authCode;
+    private String accessToken;
 }
