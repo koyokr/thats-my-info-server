@@ -1,6 +1,6 @@
 package com.rs.privacy.web;
 
-import com.rs.privacy.model.SearchWithTokenDTO;
+import com.rs.privacy.model.SearchTokenDTO;
 import com.rs.privacy.model.SearchResult;
 import com.rs.privacy.service.SearchService;
 import com.rs.privacy.utils.ResponseUtils;
@@ -23,8 +23,8 @@ public class SearchController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<List<SearchResult>> search(SearchWithTokenDTO clientInfoDTO) {
-        List<SearchResult> searchResultList = personalInfoService.search(clientInfoDTO);
+    public ResponseEntity<List<SearchResult>> search(SearchTokenDTO searchTokenDTO) {
+        List<SearchResult> searchResultList = personalInfoService.search(searchTokenDTO);
 
         return ResponseUtils.makeResponseEntity(searchResultList, HttpStatus.OK);
     }
