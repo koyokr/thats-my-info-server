@@ -8,8 +8,11 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
         show_sql: true
-        format_sql: true
+    open-in-view: true
   mustache:
     suffix: .html
     cache: false
