@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 public class News {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, name = "title", length = 32)
