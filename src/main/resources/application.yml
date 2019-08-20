@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: 'jdbc:postgresql://privacy-postgre.postgres.database.azure.com:5432/privacy'
+    username: 'koyo@privacy-postgre'
+    password: '!@#$QWER1234'
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+  mustache:
+    suffix: .html
+    cache: false

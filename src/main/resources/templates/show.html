@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Privacy Admin Page</title>
+</head>
+<body>
+{{#privacyInfo}}
+<hi>제목 : {{title}}</hi>
+<p>{{content}}</p>
+<form method="get" action="/admin/manage/{{id}}/form">
+    <button type="submit" class="delete-button">수정</button>
+</form>
+<form method="POST" action="/admin/manage/{{id}}/delete">
+    <input type="hidden" name="_method" value="DELETE">
+    <button type="submit" class="delete-button">삭제</button>
+</form>
+{{/privacyInfo}}
+<form method="get" action="/admin/manage/">
+    <button type="submit" class="delete-button">목록</button>
+</form>
+</body>
+
+</html>
