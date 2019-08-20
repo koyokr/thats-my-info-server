@@ -59,4 +59,11 @@ public class PrivacyInfoService {
     public void delete(Long id) {
         privacyInfoRepository.deleteById(id);
     }
+
+    public void update(Long id, PrivacyInfoDTO privacyInfoDTO) {
+        PrivacyInfo savedPrivacyInfo = findById(id);
+        savedPrivacyInfo.update(privacyInfoDTO);
+
+        privacyInfoRepository.save(savedPrivacyInfo);
+    }
 }

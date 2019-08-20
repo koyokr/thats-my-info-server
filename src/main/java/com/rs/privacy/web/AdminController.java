@@ -88,6 +88,28 @@ public class AdminController {
         return "/show";
     }
 
+    @GetMapping("/manage/{id}/form")
+    public String showUpdateForm(HttpSession session, @PathVariable Long id, Model model) {
+        if (!HttpSessionUtils.isSessionedUser(session)) {
+            return "redirect:/";
+        }
+
+        model.addAttribute("privacyInfo", privacyInfoService.findById(id));
+
+        return "/updateForm";
+    }
+
+    @PutMapping("/manage/{id}/update")
+    public String updatePrivacyInfo(HttpSession session, @PathVariable Long id, PrivacyInfoDTO privacyInfoDTO) {
+        if (!HttpSessionUtils.isSessionedUser(session)) {
+            return "redirect:/";
+        }
+
+        privacyInfoService.update(id, privacyInfoDTO);
+
+        return "redirect:/admin/manage/" + id;
+    }
+
     @DeleteMapping("/manage/{id}/delete")
     public String deletePrivacyInfo(HttpSession session, @PathVariable Long id) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
