@@ -27,7 +27,7 @@ public class SolveController {
         return ResponseUtils.makeResponseEntity(success, HttpStatus.OK);
     }
 
-    @GetMapping("/normal")
+    @PostMapping("/normal")
     public ResponseEntity<SiteAdminContactDTO> normal(@RequestParam String url) {
         SiteAdminContactDTO contact = solveService.getWhois(url);
 

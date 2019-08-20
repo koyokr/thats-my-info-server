@@ -110,7 +110,7 @@ public class SolveService {
     }
 
     public SiteAdminContactDTO getWhois(String url) {
-        Pattern pattern = Pattern.compile("(?:[\\w-]+\\.)?([\\w-]+?\\.(?:(?:co|or|pe|ne|re|go|hs|ms|es|kg|sc|ac)\\.)?[\\w-]+)");
+        Pattern pattern = Pattern.compile("([\\w-]+\\.(?:(?:co|or|pe|ne|re|go|hs|ms|es|kg|sc|ac)\\.)?[\\w-]+)$");
 
         String host = UriComponentsBuilder.fromHttpUrl(url).build().getHost();
         Matcher matcher = pattern.matcher(host);
@@ -120,7 +120,7 @@ public class SolveService {
         String domain = matcher.group(1);
 
         String[] ds = domain.split("\\.");
-        String tld = ds[ds.length-1];
+        String tld = ds[ds.length - 1];
         if (tld.equals("kr") || tld.equals("xn--3e0b707e")) {
             return getContactFromKr(domain);
         }
