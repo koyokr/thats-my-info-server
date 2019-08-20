@@ -21,13 +21,13 @@ public class PrivacyInfoService {
     }
 
     public PrivacyInfo getPrivacyIs() {
-        return privacyInfoRepository.findByCategory(CategoryType.PRIVACY_IS.getViewName());
+        return privacyInfoRepository.findByCategory(CategoryType.PRIVACY_IS.name());
     }
 
     public List<PrivacyInfo> getPrivacyRulesList() {
 
         return privacyInfoRepository.findAll().stream()
-                .filter(privacyInfo -> privacyInfo.getCategory().equals(CategoryType.PRIVACY_RULES.getViewName())).collect(Collectors.toList());
+                .filter(privacyInfo -> privacyInfo.getCategory().equals(CategoryType.PRIVACY_RULES.name())).collect(Collectors.toList());
     }
 
     public void create(PrivacyInfoDTO privacyInfoDTO) {
@@ -43,13 +43,13 @@ public class PrivacyInfoService {
     public List<PrivacyInfo> getPrivacyRulesOfUseList() {
 
         return privacyInfoRepository.findAll().stream()
-                .filter(privacyInfo -> privacyInfo.getCategory().equals(CategoryType.PRIVACY_RULES_OF_USE.getViewName())).collect(Collectors.toList());
+                .filter(privacyInfo -> privacyInfo.getCategory().equals(CategoryType.PRIVACY_RULES_OF_USE.name())).collect(Collectors.toList());
     }
 
     public List<PrivacyInfo> getPrivacyRulesCampaignList() {
 
         return privacyInfoRepository.findAll().stream()
-                .filter(privacyInfo -> privacyInfo.getCategory().equals(CategoryType.PRIVACY_CAMPAIGN.getViewName())).collect(Collectors.toList());
+                .filter(privacyInfo -> privacyInfo.getCategory().equals(CategoryType.PRIVACY_CAMPAIGN.name())).collect(Collectors.toList());
     }
 
     public List<PrivacyInfo> findAll() {
