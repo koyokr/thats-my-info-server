@@ -1,22 +1,22 @@
 package com.rs.privacy.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@Setter
+@NoArgsConstructor
 public class SearchResult {
     private String siteName;
     private String url;
-    private Long numOfContents;
     private List<String> contents;
+    private Long numOfContents;
 
-    public SearchResult() {
-        this.contents = new ArrayList<>();
-    }
-
-    public void setNumOfContents() {
-        this.numOfContents = (long) this.contents.size();
+    public void setContents(List<String> contents) {
+        this.contents = contents;
+        setNumOfContents((long) contents.size());
     }
 }
