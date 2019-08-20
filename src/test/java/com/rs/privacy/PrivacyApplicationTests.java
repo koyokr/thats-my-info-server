@@ -12,5 +12,4 @@ public class PrivacyApplicationTests {
     @Test
     public void contextLoads() {
     }
-
 }
