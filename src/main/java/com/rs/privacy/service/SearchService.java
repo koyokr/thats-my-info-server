@@ -64,7 +64,7 @@ public class SearchService {
         JsonNode node = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class).getBody();
 
         String resultCode = node.get("resultcode").textValue();
-        if (!resultCode.equals("00")) {
+        if (!"00".equals(resultCode)) {
             return null;
         }
         JsonNode response = node.get("response");
@@ -265,20 +265,9 @@ public class SearchService {
         Iterator<Element> date = element.select(".date").iterator();
         Iterator<Element> content = element.select(".subject").iterator();
 
-        List<String> crawlDate = new ArrayList<>();
-        List<String> crawlContent = new ArrayList<>();
-
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element contentElement = content.next();
-
-            crawlDate.add(dateElement.text());
-            crawlContent.add(contentElement.text());
-
-            for (int i = 0; i < 2; i++) {
-                crawlDate.remove(0);
-                crawlContent.remove(0);
-            }
             contents.add(dateElement.text() + " " + contentElement.text());
         }
 

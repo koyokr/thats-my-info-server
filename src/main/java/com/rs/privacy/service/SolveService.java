@@ -106,7 +106,7 @@ public class SolveService {
         map.add("parentAgreementNeed", "false");
         String result = restTemplate.postForObject(REPORT_INQUIRY_INSERT_URL, new HttpEntity<>(map, headers), String.class);
 
-        return result.equals("SUCCESS");
+        return "SUCCESS".equals(result);
     }
 
     public SiteAdminContactDTO getWhois(String url) {
@@ -121,7 +121,7 @@ public class SolveService {
 
         String[] ds = domain.split("\\.");
         String tld = ds[ds.length - 1];
-        if (tld.equals("kr") || tld.equals("xn--3e0b707e")) {
+        if ("kr".equals(tld) || "xn--3e0b707e".equals(tld)) {
             return getContactFromKr(domain);
         }
         return getContactFromNotKr(domain);

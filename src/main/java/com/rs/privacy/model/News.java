@@ -1,5 +1,6 @@
 package com.rs.privacy.model;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,11 +25,16 @@ public class News {
     @Lob
     private String content;
 
+    @Setter(AccessLevel.PRIVATE)
     @Column(nullable = false, name = "created_at")
     private Timestamp createdAt;
 
     public News(NewsDTO newsDTO) {
         this.title = newsDTO.getTitle();
         this.content = newsDTO.getContent();
+    }
+
+    public Timestamp getCreatedAt() {
+        return new Timestamp(createdAt.getTime());
     }
 }

@@ -5,8 +5,6 @@ import com.rs.privacy.model.PrivacyInfoDTO;
 import com.rs.privacy.service.AdminService;
 import com.rs.privacy.service.PrivacyInfoService;
 import com.rs.privacy.utils.HttpSessionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,7 +15,6 @@ import javax.servlet.http.HttpSession;
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
-    Logger log = LoggerFactory.getLogger(AdminController.class);
 
     @Autowired
     private AdminService adminService;
@@ -36,9 +33,6 @@ public class AdminController {
 
     @PostMapping("/login")
     public String login(HttpSession session, AdminInfo adminInfo) {
-        log.debug("adminInfo: {}", adminInfo);
-
-
         if (adminService.login(session, adminInfo)) {
             return "redirect:/admin/manage";
         }
