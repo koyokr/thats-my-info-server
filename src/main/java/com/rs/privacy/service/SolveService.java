@@ -38,10 +38,10 @@ public class SolveService {
     private final static String WHOIS_KISA_PUNYCODE_URL = "https://xn--c79as89aj0e29b77z.xn--3e0b707e/";
 
     @Autowired
-    RestTemplateBuilder restTemplateBuilder;
+    private RestTemplateBuilder restTemplateBuilder;
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     public Boolean inNaver(SolveNaverDTO solveDTO) {
         RestTemplate restTemplate = restTemplateBuilder.build();
