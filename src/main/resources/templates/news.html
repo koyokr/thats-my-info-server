@@ -24,27 +24,28 @@
     </div>
 </div>
 <div class="container">
-    <h1>개인정보 관련 지식 게시글</h1>
+    <h1>크롤링된 뉴스 리스트</h1>
     <p></p>
     <table class="table table-striped">
         <thead>
         <tr>
             <th>번호</th>
-            <th>분류</th>
             <th>제목</th>
         </tr>
         </thead>
         <tbody>
-        {{#privacyInfoList}}
-        <tr align="center" onClick="location.href='/admin/manage/{{id}}'" style="cursor:pointer;">
+        {{#newsList}}
+        <tr align="center" onClick="location.href='/admin/crawlNews/{{id}}'" style="cursor:pointer;">
             <td>{{id}}</td>
-            <td>{{category}}</td>
             <td>{{title}}</td>
         </tr>
-        {{/privacyInfoList}}
+        {{/newsList}}
         </tbody>
     </table>
-    <form method="get" action="/admin/manage/form">
+    <form method="get" action="/search">
+        <button type="submit" class="btn btn-default pull-right">let's crawling!</button>
+    </form>
+    <form method="get" action="/admin/crawlNews/form">
         <button type="submit" class="btn btn-default pull-right">글쓰기</button>
     </form>
 </div>

@@ -23,18 +23,18 @@
     <div class="col-md-12">
     </div>
 </div>
-{{#privacyInfo}}
+{{#crawlNews}}
 <hi>제목 : {{title}}</hi>
 <p>{{content}}</p>
-<form method="get" action="/admin/crawlNews/{{id}}/form">
+<form method="get" action="/admin/manage/{{id}}/form">
     <button type="submit" class="delete-button">수정</button>
 </form>
-<form method="POST" action="/admin/crawlNews/{{id}}/delete">
+<form method="POST" action="/admin/manage/{{id}}/delete">
     <input type="hidden" name="_method" value="DELETE">
     <button type="submit" class="delete-button">삭제</button>
 </form>
-{{/privacyInfo}}
-<form method="get" action="/admin/crawlNews/">
+{{/crwalNews}}
+<form method="get" action="/admin/manage/">
     <button type="submit" class="delete-button">목록</button>
 </form>
 </body>

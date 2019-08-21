@@ -25,29 +25,18 @@
 </div>
 <div class=container>
     <div class="panel panel-default content-main">
-        {{#privacyInfo}}
-        <form name="posts" method="post" action="/admin/manage/{{id}}/update">
-            <input type="hidden" name="_method" value="PUT">
+        <form name="posts" method="post" action="/admin/crawlNews/form/upload">
             <div class="form-group">
                 <label for="title">제목</label>
-                <input type="text" class="form-control" id="title" name="title" placeholder="제목" value="{{title}}">
-            </div>
-            <div>
-                <select name="category" , id="category">
-                    <option value="PRIVACY_IS">개인정보란</option>
-                    <option value="PRIVACY_RULES">개인정보 보호 관련 법제</option>
-                    <option value="PRIVACY_RULES_OF_USE">개인정보 보호 이용수칙</option>
-                    <option value="PRIVACY_CAMPAIGN">내 정보 지킴이 켐페인</option>
-                </select>
+                <input type="text" class="form-control" id="title" name="title" placeholder="제목"/>
             </div>
             <div class="form-group">
                 <label for="title">내용</label>
-                <input type="text" class="form-control" id="content" name="content" style="height: 350px" placeholder="내용" value="{{content}}"/>
+                <input type="text" class="form-control" id="content" name="content" style="height: 350px" placeholder="내용"/>
             </div>
-            <button type="submit" class="btn btn-default clearfix pull-right">수정</button>
+            <button type="submit" class="btn btn-default clearfix pull-right">글쓰기</button>
             <div class="clearfix"/>
         </form>
-        {{/privacyInfo}}
     </div>
 </div>
 
