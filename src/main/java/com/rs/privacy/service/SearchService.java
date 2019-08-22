@@ -17,6 +17,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -101,14 +102,26 @@ public class SearchService {
     }
 
     private PersonDTO getSearchDTO(PerosnTokenDTO perosnTokenDTO) {
+        String accessToken = perosnTokenDTO.getAccessToken();
+
         String url = "https://openapi.naver.com/v1/nid/me";
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + perosnTokenDTO.getAccessToken());
+        headers.set("Authorization", "Bearer " + accessToken);
 
         JsonNode node = getNode(url, headers);
         if (node == null) {
             return null;
         }
+
+        String urlDeleteToken = UriComponentsBuilder.fromHttpUrl("https://nid.naver.com/oauth2.0/token")
+                .queryParam("grant_type", "delete")
+                .queryParam("client_id", NAVER_CLIENT_ID)
+                .queryParam("client_secret", NAVER_CLIENT_SECRET)
+                .queryParam("access_token", accessToken)
+                .queryParam("service_provider", "NAVER")
+                .build().toUriString();
+        getNode(urlDeleteToken);
+
         String resultCode = node.get("resultcode").textValue();
         if (!"00".equals(resultCode)) {
             return null;
@@ -122,6 +135,11 @@ public class SearchService {
                 response.get("email").textValue(),
                 response.get("nickname").textValue()
         );
+    }
+
+    private JsonNode getNode(String url) {
+        RestTemplate restTemplate = restTemplateBuilder.build();
+        return restTemplate.getForObject(url, JsonNode.class);
     }
 
     private JsonNode getNode(String url, HttpHeaders headers) {
