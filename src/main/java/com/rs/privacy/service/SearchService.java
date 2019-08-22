@@ -71,7 +71,7 @@ public class SearchService {
         resultList.add(crawlNaverSearch(naverId,  naverName,naverNickname, naverPhonNumber,naverEmail));
         resultList.add(crawlTodayHumor(naverId));
         resultList.add(crawlTwitter(naverId));
-        //resultList.add(crawlGoogleSearch(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
+        resultList.add(crawlGoogleSearch(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
 
         return resultList;
     }
@@ -113,7 +113,7 @@ public class SearchService {
         searchResults.add(crawlNaverSearch(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
         searchResults.add(crawlTodayHumor(naverId));
         searchResults.add(crawlTwitter(naverId));
-        //searchResults.add(crawlGoogleSearch(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
+          searchResults.add(crawlGoogleSearch(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
 
         return new TotalSearchResultDTO(personDTO, searchResults);
     }
@@ -210,7 +210,7 @@ public class SearchService {
         for (JsonNode value : webPages.get("value")) {
             String name = value.get("name").textValue();
             String snippet = value.get("snippet").textValue();
-            String url_temp = "";
+            String url_temp = url;
             result.addContent(name + " " + snippet, url_temp);
         }
         return result;
@@ -231,7 +231,7 @@ public class SearchService {
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element titleElement = title.next();
-            String url_temp = "";
+            String url_temp = url;
             result.addContent(dateElement.text() + " " + titleElement.text(), url_temp);
         }
         return result;
@@ -836,7 +836,7 @@ public class SearchService {
         while (content.hasNext()) {
             Element contentElement = content.next();
             Element fUrlElement = fUrl.next();
-            String url_temp = "";
+            String url_temp = url;
             result.addContent(contentElement.text() + " " + fUrlElement.text(), url_temp);
         }
         return result;
@@ -860,7 +860,7 @@ public class SearchService {
         for (Element dateElement : element.select("div.cont.box3 .date")) {
             Element titleElement = cb1.next();
             Element contentElement = cb2.next();
-            String url_temp = "";
+            String url_temp = url;
             result.addContent(dateElement.text() + " " + titleElement.text() + " " + contentElement.text(),url_temp);
         }
         return result;
@@ -885,7 +885,7 @@ public class SearchService {
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element contentElement = content.next();
-            String url_temp = "";
+            String url_temp = url;
             result.addContent(dateElement.text() + " " + contentElement.text(),url_temp);
         }
         return result;
@@ -917,7 +917,7 @@ public class SearchService {
             if (unuse != null) {
                 unuse.remove();
             }
-            String url_temp = "";
+            String url_temp = url;
             result.addContent(time.text() + " " + title.text(),url_temp);
         }
         return result;
@@ -939,12 +939,16 @@ public class SearchService {
         Iterator<Element> date = element.select("td.t_num.tc").iterator();
         Iterator<Element> contentQ = element.select("dt").iterator();
         Iterator<Element> contentA = element.select("dd").iterator();
+        Iterator<Element> rurl = element.select("link_article._linkList").iterator();
 
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element contentElementQ = contentQ.next();
             Element contentElementA = contentA.next();
-            String url_temp = "";
+            Element urlElement = contentA.next();
+            //String urll = element.attr('data-detail-url');
+
+            String url_temp = url;
             result.addContent(dateElement.text() + " Q:" + contentElementQ.text() + " A:" + contentElementA.text(),url_temp);
         }
         return result;
@@ -1655,7 +1659,7 @@ public class SearchService {
         for (Element view : views) {
             Element subject = view.selectFirst("td.subject a");
             Element date = view.selectFirst("td.date");
-            String url_temp = "";
+            String url_temp = url;
             result.addContent(subject.text() + " " + date.text(), url_temp);
         }
         return result;
@@ -1674,11 +1678,390 @@ public class SearchService {
             return result;
         }
         for (Element content : element.select("div.js-tweet-text-container")) {
-            String url_temp = "";
+            String url_temp = url;
             result.addContent(content.text(),url_temp);
         }
         return result;
     }
 
+    private SearchResultDTO crawlGoogleSearch(String id, String naverName, String naverNickname, String naverPhonNumber, String naverEmail){
+        //Search ID
+        String url = "https://www.google.com/search?newwindow=1&ei=sfheXablEo3nwQO1yK2gCg&q=" + id;
+        SearchResultDTO result = new SearchResultDTO("Google 검색", url);
 
+        //중복제거
+
+        List<String> overlap_Check = new ArrayList<String>();
+
+        Document doc = null;        //Document에는 페이지의 전체 소스가 저장된다
+
+        try {
+            doc = Jsoup.connect(url).get();
+        } catch (
+                IOException e) {
+            e.printStackTrace();
+        }
+        Elements element = doc.select("div.bkWMgd");
+
+        Iterator<Element> ie1 = element.select("h3.LC20lb").iterator();
+        Iterator<Element> ie2 = element.select("span.st").iterator();
+        Iterator<Element> ie5 = element.select(".r").iterator();
+
+        List<String> CrawlURL = new ArrayList<String>();
+
+        while (ie1.hasNext()) {
+            String contents = ie1.next().text() + " "  + ie2.next().text();
+            Element urlElement = ie5.next().selectFirst(".r").child(0);
+            String href = urlElement.attr("href");
+            CrawlURL.add(href);
+
+            if(!overlap_Check.contains(href)){
+                result.addContent(contents , href);
+            }
+            overlap_Check.add(href);
+        }
+
+        //Search Nickname
+        url = "https://www.google.com/search?newwindow=1&ei=sfheXablEo3nwQO1yK2gCg&q=" + naverNickname;
+
+        doc = null;        //Document에는 페이지의 전체 소스가 저장된다
+
+        try {
+            doc = Jsoup.connect(url).get();
+        } catch (
+                IOException e) {
+            e.printStackTrace();
+        }
+        element = doc.select("div.bkWMgd");
+
+        ie1 = element.select("h3.LC20lb").iterator();
+        ie2 = element.select("span.st").iterator();
+        ie5 = element.select(".r").iterator();
+
+        CrawlURL = new ArrayList<String>();
+
+        while (ie1.hasNext()) {
+            String contents = ie1.next().text() + " "  + ie2.next().text();
+            Element urlElement = ie5.next().selectFirst(".r").child(0);
+            String href = urlElement.attr("href");
+            CrawlURL.add(href);
+
+            if(!overlap_Check.contains(href)){
+                result.addContent(contents , href);
+            }
+            overlap_Check.add(href);
+        }
+
+        //Search Phone number
+        url = "https://www.google.com/search?newwindow=1&ei=sfheXablEo3nwQO1yK2gCg&q=" + "\"" + naverPhonNumber + "\"";
+
+        doc = null;        //Document에는 페이지의 전체 소스가 저장된다
+
+        try {
+            doc = Jsoup.connect(url).get();
+        } catch (
+                IOException e) {
+            e.printStackTrace();
+        }
+        element = doc.select("div.bkWMgd");
+
+        ie1 = element.select("h3.LC20lb").iterator();
+        ie2 = element.select("span.st").iterator();
+        ie5 = element.select(".r").iterator();
+
+        CrawlURL = new ArrayList<String>();
+
+        while (ie1.hasNext()) {
+            String contents = ie1.next().text() + " "  + ie2.next().text();
+            Element urlElement = ie5.next().selectFirst(".r").child(0);
+            String href = urlElement.attr("href");
+            CrawlURL.add(href);
+
+            if(!overlap_Check.contains(href)){
+                result.addContent(contents , href);
+            }
+            overlap_Check.add(href);
+        }
+
+        //Search E-mail
+        url = "https://www.google.com/search?newwindow=1&ei=sfheXablEo3nwQO1yK2gCg&q=" + "\"" + naverEmail + "\"";
+
+        doc = null;        //Document에는 페이지의 전체 소스가 저장된다
+
+        try {
+            doc = Jsoup.connect(url).get();
+        } catch (
+                IOException e) {
+            e.printStackTrace();
+        }
+        element = doc.select("div.bkWMgd");
+
+        ie1 = element.select("h3.LC20lb").iterator();
+        ie2 = element.select("span.st").iterator();
+        ie5 = element.select(".r").iterator();
+
+        CrawlURL = new ArrayList<String>();
+
+        while (ie1.hasNext()) {
+            String contents = ie1.next().text() + " "  + ie2.next().text();
+            Element urlElement = ie5.next().selectFirst(".r").child(0);
+            String href = urlElement.attr("href");
+            CrawlURL.add(href);
+
+            if(!overlap_Check.contains(href)){
+                result.addContent(contents , href);
+            }
+            overlap_Check.add(href);
+        }
+
+        //Search Name + Phone Number
+        url = "https://www.google.com/search?newwindow=1&ei=sfheXablEo3nwQO1yK2gCg&q=" + "\"" + naverName + "\"" + "\"" + naverPhonNumber + "\"";
+
+        doc = null;        //Document에는 페이지의 전체 소스가 저장된다
+
+        try {
+            doc = Jsoup.connect(url).get();
+        } catch (
+                IOException e) {
+            e.printStackTrace();
+        }
+        element = doc.select("div.bkWMgd");
+
+        ie1 = element.select("h3.LC20lb").iterator();
+        ie2 = element.select("span.st").iterator();
+        ie5 = element.select(".r").iterator();
+
+        CrawlURL = new ArrayList<String>();
+
+        while (ie1.hasNext()) {
+            String contents = ie1.next().text() + " "  + ie2.next().text();
+            Element urlElement = ie5.next().selectFirst(".r").child(0);
+            String href = urlElement.attr("href");
+            CrawlURL.add(href);
+
+            if(!overlap_Check.contains(href)){
+                result.addContent(contents , href);
+            }
+            overlap_Check.add(href);
+        }
+
+        //Search Name + Email
+        url = "https://www.google.com/search?newwindow=1&ei=sfheXablEo3nwQO1yK2gCg&q=" + "\"" + naverName + "\"" + "\"" + naverEmail + "\"";
+
+        doc = null;        //Document에는 페이지의 전체 소스가 저장된다
+
+        try {
+            doc = Jsoup.connect(url).get();
+        } catch (
+                IOException e) {
+            e.printStackTrace();
+        }
+        element = doc.select("div.bkWMgd");
+
+        ie1 = element.select("h3.LC20lb").iterator();
+        ie2 = element.select("span.st").iterator();
+        ie5 = element.select(".r").iterator();
+
+        CrawlURL = new ArrayList<String>();
+
+        while (ie1.hasNext()) {
+            String contents = ie1.next().text() + " "  + ie2.next().text();
+            Element urlElement = ie5.next().selectFirst(".r").child(0);
+            String href = urlElement.attr("href");
+            CrawlURL.add(href);
+
+            if(!overlap_Check.contains(href)){
+                result.addContent(contents , href);
+            }
+            overlap_Check.add(href);
+        }
+
+        //Search Name + ID
+        url = "https://www.google.com/search?newwindow=1&ei=sfheXablEo3nwQO1yK2gCg&q=" + "\"" + naverName + "\"" + "\"" + id + "\"";
+
+        doc = null;        //Document에는 페이지의 전체 소스가 저장된다
+
+        try {
+            doc = Jsoup.connect(url).get();
+        } catch (
+                IOException e) {
+            e.printStackTrace();
+        }
+        element = doc.select("div.bkWMgd");
+
+        ie1 = element.select("h3.LC20lb").iterator();
+        ie2 = element.select("span.st").iterator();
+        ie5 = element.select(".r").iterator();
+
+        CrawlURL = new ArrayList<String>();
+
+        while (ie1.hasNext()) {
+            String contents = ie1.next().text() + " "  + ie2.next().text();
+            Element urlElement = ie5.next().selectFirst(".r").child(0);
+            String href = urlElement.attr("href");
+            CrawlURL.add(href);
+
+            if(!overlap_Check.contains(href)){
+                result.addContent(contents , href);
+            }
+            overlap_Check.add(href);
+        }
+
+        //Search Nickname + Phone number
+        url = "https://www.google.com/search?newwindow=1&ei=sfheXablEo3nwQO1yK2gCg&q=" + "\"" + naverNickname + "\"" + "\"" + naverPhonNumber + "\"";
+
+        doc = null;        //Document에는 페이지의 전체 소스가 저장된다
+
+        try {
+            doc = Jsoup.connect(url).get();
+        } catch (
+                IOException e) {
+            e.printStackTrace();
+        }
+        element = doc.select("div.bkWMgd");
+
+        ie1 = element.select("h3.LC20lb").iterator();
+        ie2 = element.select("span.st").iterator();
+        ie5 = element.select(".r").iterator();
+
+        CrawlURL = new ArrayList<String>();
+
+        while (ie1.hasNext()) {
+            String contents = ie1.next().text() + " "  + ie2.next().text();
+            Element urlElement = ie5.next().selectFirst(".r").child(0);
+            String href = urlElement.attr("href");
+            CrawlURL.add(href);
+
+            if(!overlap_Check.contains(href)){
+                result.addContent(contents , href);
+            }
+            overlap_Check.add(href);
+        }
+
+        //Search NicName + Email
+        url = "https://www.google.com/search?newwindow=1&ei=sfheXablEo3nwQO1yK2gCg&q=" + "\"" + naverNickname + "\"" + "\"" + naverEmail + "\"";
+
+        doc = null;        //Document에는 페이지의 전체 소스가 저장된다
+
+        try {
+            doc = Jsoup.connect(url).get();
+        } catch (
+                IOException e) {
+            e.printStackTrace();
+        }
+        element = doc.select("div.bkWMgd");
+
+        ie1 = element.select("h3.LC20lb").iterator();
+        ie2 = element.select("span.st").iterator();
+        ie5 = element.select(".r").iterator();
+
+        CrawlURL = new ArrayList<String>();
+
+        while (ie1.hasNext()) {
+            String contents = ie1.next().text() + " "  + ie2.next().text();
+            Element urlElement = ie5.next().selectFirst(".r").child(0);
+            String href = urlElement.attr("href");
+            CrawlURL.add(href);
+
+            if(!overlap_Check.contains(href)){
+                result.addContent(contents , href);
+            }
+            overlap_Check.add(href);
+        }
+
+        //Search Nicname + id
+        url = "https://www.google.com/search?newwindow=1&ei=sfheXablEo3nwQO1yK2gCg&q=" + "\"" + naverNickname + "\"" + "\"" + id + "\"";
+
+        doc = null;        //Document에는 페이지의 전체 소스가 저장된다
+
+        try {
+            doc = Jsoup.connect(url).get();
+        } catch (
+                IOException e) {
+            e.printStackTrace();
+        }
+        element = doc.select("div.bkWMgd");
+
+        ie1 = element.select("h3.LC20lb").iterator();
+        ie2 = element.select("span.st").iterator();
+        ie5 = element.select(".r").iterator();
+
+        CrawlURL = new ArrayList<String>();
+
+        while (ie1.hasNext()) {
+            String contents = ie1.next().text() + " "  + ie2.next().text();
+            Element urlElement = ie5.next().selectFirst(".r").child(0);
+            String href = urlElement.attr("href");
+            CrawlURL.add(href);
+
+            if(!overlap_Check.contains(href)){
+                result.addContent(contents , href);
+            }
+            overlap_Check.add(href);
+        }
+
+        //Search ID + Phone number
+        url = "https://www.google.com/search?newwindow=1&ei=sfheXablEo3nwQO1yK2gCg&q=" + "\"" + id + "\"" + "\"" + naverPhonNumber + "\"";
+
+        doc = null;        //Document에는 페이지의 전체 소스가 저장된다
+
+        try {
+            doc = Jsoup.connect(url).get();
+        } catch (
+                IOException e) {
+            e.printStackTrace();
+        }
+        element = doc.select("div.bkWMgd");
+
+        ie1 = element.select("h3.LC20lb").iterator();
+        ie2 = element.select("span.st").iterator();
+        ie5 = element.select(".r").iterator();
+
+        CrawlURL = new ArrayList<String>();
+
+        while (ie1.hasNext()) {
+            String contents = ie1.next().text() + " "  + ie2.next().text();
+            Element urlElement = ie5.next().selectFirst(".r").child(0);
+            String href = urlElement.attr("href");
+            CrawlURL.add(href);
+
+            if(!overlap_Check.contains(href)){
+                result.addContent(contents , href);
+            }
+            overlap_Check.add(href);
+        }
+
+        //Search ID + Email
+        url = "https://www.google.com/search?newwindow=1&ei=sfheXablEo3nwQO1yK2gCg&q=" + "\"" + id + "\"" + "\"" + naverEmail + "\"";
+
+        doc = null;        //Document에는 페이지의 전체 소스가 저장된다
+
+        try {
+            doc = Jsoup.connect(url).get();
+        } catch (
+                IOException e) {
+            e.printStackTrace();
+        }
+        element = doc.select("div.bkWMgd");
+
+        ie1 = element.select("h3.LC20lb").iterator();
+        ie2 = element.select("span.st").iterator();
+        ie5 = element.select(".r").iterator();
+
+        CrawlURL = new ArrayList<String>();
+
+        while (ie1.hasNext()) {
+            String contents = ie1.next().text() + " "  + ie2.next().text();
+            Element urlElement = ie5.next().selectFirst(".r").child(0);
+            String href = urlElement.attr("href");
+            CrawlURL.add(href);
+
+            if(!overlap_Check.contains(href)){
+                result.addContent(contents , href);
+            }
+            overlap_Check.add(href);
+        }
+
+        return result;
+    }
 }
