@@ -75,8 +75,31 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
+                <groupId>com.microsoft.azure</groupId>
+                <artifactId>azure-webapp-maven-plugin</artifactId>
+                <version>1.7.0</version>
+                <configuration>
+                    <schemaVersion>V2</schemaVersion>
+                    <resourceGroup>KISA</resourceGroup>
+                    <appName>rs-privacy-admin</appName>
+                    <region>koreacentral</region>
+                    <pricingTier>P1V2</pricingTier>
+                    <runtime>
+                        <os>linux</os>
+                        <javaVersion>java11</javaVersion>
+                        <webContainer>TOMCAT 9.0</webContainer>
+                    </runtime>
+                    <deployment>
+                        <resources>
+                            <resource>
+                                <directory>${project.basedir}/target</directory>
+                                <includes>
+                                    <include>*.war</include>
+                                </includes>
+                            </resource>
+                        </resources>
+                    </deployment>
+                </configuration>
             </plugin>
         </plugins>
     </build>
