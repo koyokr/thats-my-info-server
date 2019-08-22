@@ -14,8 +14,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/admin/**").permitAll()
-                .antMatchers("/nvlogin/**", "/news/**", "/info/**", "/solve/**", "/search/**").permitAll()
+                .antMatchers("/admin**").permitAll()
+                .antMatchers("/nvlogin/**", "/news/**", "/info/**", "/solve/**").permitAll()
+                .antMatchers("/search**", "/existsNaverId").permitAll()
                 .antMatchers("/css/**", "/fonts/**", "/images.icons/**", "/js/**", "/vendor/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
