@@ -44,7 +44,7 @@ public class SolveService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public Boolean inNaver(SolveNaverDTO solveDTO) {
+    public Boolean naver(SolveNaverDTO solveDTO) {
         RestTemplate restTemplate = restTemplateBuilder.build();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Referer", REFERER_URL);
@@ -110,7 +110,7 @@ public class SolveService {
         return "SUCCESS".equals(result);
     }
 
-    public SiteAdminContactDTO getWhois(String url) {
+    public SiteAdminContactDTO contact(String url) {
         Pattern pattern = Pattern.compile("([\\w-]+\\.(?:(?:co|or|pe|ne|re|go|hs|ms|es|kg|sc|ac)\\.)?[\\w-]+)$");
 
         String host = UriComponentsBuilder.fromHttpUrl(url).build().getHost();
