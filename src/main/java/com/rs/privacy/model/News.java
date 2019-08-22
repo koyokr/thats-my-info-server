@@ -21,8 +21,9 @@ public class News {
     @Column(nullable = false, name = "title", length = 32)
     private String title;
 
-    @Column(nullable = false, name = "content")
     @Lob
+    @Column(nullable = false, name = "content")
+    @org.hibernate.annotations.Type(type = "org.hibernate.type.TextType")
     private String content;
 
     @Setter(AccessLevel.PRIVATE)
@@ -36,5 +37,10 @@ public class News {
 
     public Timestamp getCreatedAt() {
         return new Timestamp(createdAt.getTime());
+    }
+
+    public void update(NewsDTO newsDTO) {
+        this.title = newsDTO.getTitle();
+        this.title = newsDTO.getContent();
     }
 }

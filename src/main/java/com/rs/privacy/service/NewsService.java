@@ -33,4 +33,20 @@ public class NewsService {
 
         newsRepository.save(createdNews);
     }
+
+    public News findById(Long id) {
+        return newsRepository.findById(id).orElseThrow(RuntimeException::new);
+    }
+
+    public void update(Long id, NewsDTO newsDTO) {
+        News savedNews = findById(id);
+        savedNews.update(newsDTO);
+
+        newsRepository.save(savedNews);
+    }
+
+    public void delete(Long id) {
+
+        newsRepository.deleteById(id);
+    }
 }
