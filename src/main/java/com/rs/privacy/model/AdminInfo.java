@@ -23,7 +23,6 @@ public class AdminInfo {
     @Column(nullable = false, name = "pw")
     private String pw;
 
-    public boolean matchPassword(AdminInfo adminInfo) {
-        return this.pw.equals(adminInfo.getPw());
-    }
+    @Column(nullable = false, name = "fail_count")
+    private Integer failCount;
 }
