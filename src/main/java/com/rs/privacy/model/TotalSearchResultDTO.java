@@ -8,6 +8,6 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class TotalSearchResultDTO {
-    private PersonDTO personDTO;
-    private List<SearchResultDTO> searchResults;
+    private PersonDTO person;
+    private List<SearchResultDTO> results;
 }

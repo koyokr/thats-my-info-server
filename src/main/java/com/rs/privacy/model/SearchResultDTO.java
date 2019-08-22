@@ -12,16 +12,21 @@ public class SearchResultDTO {
     private String siteName;
     private String url;
     private List<String> contents;
-    private Long numOfContents;
+    private Integer numOfContents;
 
     public SearchResultDTO(String siteName, String url) {
         this.siteName = siteName;
         this.url = url;
-        contents = new ArrayList();
-        numOfContents = 0L;
+        contents = new ArrayList<>();
+        numOfContents = 0;
     }
 
-    public void setNumOfContents() {
-        numOfContents = (long) contents.size();
+    public void addContent(String content) {
+        Integer maxLength = 40;
+        if (content.length() > maxLength) {
+            content = content.substring(0, maxLength);
+        }
+        contents.add(content);
+        numOfContents = contents.size();
     }
 }
