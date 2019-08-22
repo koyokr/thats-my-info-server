@@ -1,9 +1,13 @@
 package com.rs.privacy.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
 public class NaverLoginTokenDTO {
     @JsonProperty("access_token")
     private String accessToken;

@@ -45,6 +45,4 @@ public class NewsController {
 
         return ResponseUtils.makeResponseEntity(HttpStatus.OK);
     }
-
-
 }

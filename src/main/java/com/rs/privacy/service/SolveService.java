@@ -277,5 +277,4 @@ public class SolveService {
         contact.setRegistrar(getMatcherGroupFirst(registrarPatterns, whoisResult));
         return contact;
     }
-
 }

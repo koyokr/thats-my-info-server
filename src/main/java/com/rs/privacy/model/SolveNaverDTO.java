@@ -1,8 +1,12 @@
 package com.rs.privacy.model;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
 public class SolveNaverDTO {
     private String email;
     private String url;

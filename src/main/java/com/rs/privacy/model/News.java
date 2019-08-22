@@ -8,7 +8,6 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.sql.Timestamp;
 
-
 @Entity
 @Getter
 @Setter
@@ -18,7 +17,7 @@ public class News {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, name = "title", length = 32)
+    @Column(nullable = false, name = "title")
     private String title;
 
     @Lob

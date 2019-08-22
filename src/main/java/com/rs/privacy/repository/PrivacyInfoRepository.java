@@ -7,6 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PrivacyInfoRepository extends JpaRepository<PrivacyInfo, Long> {
 
-
     PrivacyInfo findByCategory(String category);
 }
