@@ -17,6 +17,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -125,14 +126,26 @@ public class SearchService {
     }
 
     private PersonDTO getSearchDTO(PerosnTokenDTO perosnTokenDTO) {
+        String accessToken = perosnTokenDTO.getAccessToken();
+
         String url = "https://openapi.naver.com/v1/nid/me";
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + perosnTokenDTO.getAccessToken());
+        headers.set("Authorization", "Bearer " + accessToken);
 
         JsonNode node = getNode(url, headers);
         if (node == null) {
             return null;
         }
+
+        String urlDeleteToken = UriComponentsBuilder.fromHttpUrl("https://nid.naver.com/oauth2.0/token")
+                .queryParam("grant_type", "delete")
+                .queryParam("client_id", NAVER_CLIENT_ID)
+                .queryParam("client_secret", NAVER_CLIENT_SECRET)
+                .queryParam("access_token", accessToken)
+                .queryParam("service_provider", "NAVER")
+                .build().toUriString();
+        getNode(urlDeleteToken);
+
         String resultCode = node.get("resultcode").textValue();
         if (!"00".equals(resultCode)) {
             return null;
@@ -148,6 +161,11 @@ public class SearchService {
         );
     }
 
+    private JsonNode getNode(String url) {
+        RestTemplate restTemplate = restTemplateBuilder.build();
+        return restTemplate.getForObject(url, JsonNode.class);
+    }
+
     private JsonNode getNode(String url, HttpHeaders headers) {
         RestTemplate restTemplate = restTemplateBuilder.build();
         HttpEntity entity = new HttpEntity(headers);
@@ -156,7 +174,6 @@ public class SearchService {
         if (!response.getStatusCode().is2xxSuccessful()) {
             return null;
         }
-
         return response.getBody();
     }
 
@@ -179,11 +196,11 @@ public class SearchService {
         String urlApi = "https://api.cognitive.microsoft.com/bing/v7.0/search?q=" + id + "&mkt=ko-kr";
         HttpHeaders headers = new HttpHeaders();
         headers.set("Ocp-Apim-Subscription-Key", AZURE_BING_SEARCH_KEY);
+
         JsonNode node = getNode(urlApi, headers);
         if (node == null) {
             return result;
         }
-
         JsonNode webPages = node.get("webPages");
         if (webPages == null) {
             return result;
@@ -191,9 +208,8 @@ public class SearchService {
         for (JsonNode value : webPages.get("value")) {
             String name = value.get("name").textValue();
             String snippet = value.get("snippet").textValue();
-            result.getContents().add(name + " " + snippet);
+            result.addContent(name + " " + snippet);
         }
-        result.setNumOfContents();
         return result;
     }
 
@@ -205,7 +221,6 @@ public class SearchService {
         if (doc == null) {
             return result;
         }
-
         Element element = doc.selectFirst("div");
         Iterator<Element> date = element.select(".list_time").iterator();
         Iterator<Element> title = element.select(".list_title.oneline").iterator();
@@ -213,10 +228,8 @@ public class SearchService {
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element titleElement = title.next();
-            result.getContents().add(dateElement.text() + " " + titleElement.text());
+            result.addContent(dateElement.text() + " " + titleElement.text());
         }
-        result.setNumOfContents();
-
         return result;
     }
 
@@ -227,18 +240,16 @@ public class SearchService {
         String urlApi = "https://dapi.kakao.com/v2/search/cafe?query=" + id;
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "KakaoAK " + KAKAO_REST_API_KEY);
+
         JsonNode node = getNode(urlApi, headers);
         if (node == null) {
             return result;
         }
-
         for (JsonNode document : node.get("documents")) {
-            String cafename = document.get("cafename").textValue();
+            String cafeName = document.get("cafename").textValue();
             String contents = document.get("contents").textValue();
-            result.getContents().add(removeTag(cafename + " " + contents));
+            result.addContent(removeTag(cafeName + " " + contents));
         }
-        result.setNumOfContents();
-
         return result;
     }
 
@@ -249,18 +260,16 @@ public class SearchService {
         String urlApi = "https://dapi.kakao.com/v2/search/web?query=" + id;
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "KakaoAK " + KAKAO_REST_API_KEY);
+
         JsonNode node = getNode(urlApi, headers);
         if (node == null) {
             return result;
         }
-
         for (JsonNode document : node.get("documents")) {
             String title = document.get("title").textValue();
             String contents = document.get("contents").textValue();
-            result.getContents().add(removeTag(title + " " + contents));
+            result.addContent(removeTag(title + " " + contents));
         }
-        result.setNumOfContents();
-
         return result;
     }
 
@@ -272,7 +281,6 @@ public class SearchService {
         if (doc == null) {
             return result;
         }
-
         Element element = doc.selectFirst("#siteColl");
         Iterator<Element> content = element.select("div.cont_inner").iterator();
         Iterator<Element> fUrl = element.select(".f_url").iterator();
@@ -280,10 +288,8 @@ public class SearchService {
         while (content.hasNext()) {
             Element contentElement = content.next();
             Element fUrlElement = fUrl.next();
-            result.getContents().add(contentElement.text() + " " + fUrlElement.text());
+            result.addContent(contentElement.text() + " " + fUrlElement.text());
         }
-        result.setNumOfContents();
-
         return result;
     }
 
@@ -295,7 +301,6 @@ public class SearchService {
         if (doc == null) {
             return result;
         }
-
         Element element = doc.selectFirst("#container");
         if (element == null) {
             return result;
@@ -306,10 +311,8 @@ public class SearchService {
         for (Element dateElement : element.select("div.cont.box3 .date")) {
             Element titleElement = cb1.next();
             Element contentElement = cb2.next();
-            result.getContents().add(dateElement.text() + " " + titleElement.text() + " " + contentElement.text());
+            result.addContent(dateElement.text() + " " + titleElement.text() + " " + contentElement.text());
         }
-        result.setNumOfContents();
-
         return result;
     }
 
@@ -332,10 +335,8 @@ public class SearchService {
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element contentElement = content.next();
-            result.getContents().add(dateElement.text() + " " + contentElement.text());
+            result.addContent(dateElement.text() + " " + contentElement.text());
         }
-        result.setNumOfContents();
-
         return result;
     }
 
@@ -365,10 +366,8 @@ public class SearchService {
             if (unuse != null) {
                 unuse.remove();
             }
-            result.getContents().add(time.text() + " " + title.text());
+            result.addContent(time.text() + " " + title.text());
         }
-        result.setNumOfContents();
-
         return result;
     }
 
@@ -393,10 +392,8 @@ public class SearchService {
             Element dateElement = date.next();
             Element contentElementQ = contentQ.next();
             Element contentElementA = contentA.next();
-            result.getContents().add(dateElement.text() + " Q:" + contentElementQ.text() + " A:" + contentElementA.text());
+            result.addContent(dateElement.text() + " Q:" + contentElementQ.text() + " A:" + contentElementA.text());
         }
-        result.setNumOfContents();
-
         return result;
     }
 
@@ -417,6 +414,7 @@ public class SearchService {
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
         headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+
         JsonNode node = getNode(urlApi, headers);
         if (node == null) {
             return result;
@@ -591,8 +589,6 @@ public class SearchService {
             }
             overlap_Check.add(link);
         }
-
-
         result.setNumOfContents();
         return result;
     }
@@ -609,10 +605,8 @@ public class SearchService {
         for (Element view : views) {
             Element subject = view.selectFirst("td.subject a");
             Element date = view.selectFirst("td.date");
-            result.getContents().add(subject.text() + " " + date.text());
+            result.addContent(subject.text() + " " + date.text());
         }
-        result.setNumOfContents();
-
         return result;
     }
 
@@ -629,10 +623,8 @@ public class SearchService {
             return result;
         }
         for (Element content : element.select("div.js-tweet-text-container")) {
-            result.getContents().add(content.text());
+            result.addContent(content.text());
         }
-        result.setNumOfContents();
-
         return result;
     }
 }

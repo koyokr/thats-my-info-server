@@ -38,18 +38,19 @@ public class AdminController {
 
     @PostMapping("/login")
     public String login(HttpSession session, AdminInfo adminInfo) {
-        int cnt=0;
+        Integer maxFailCount = 5;
 
-        while(cnt<5) {
-            if (adminService.login(session, adminInfo)) {
-                return "redirect:/admin/manage";
-            }
-            else {
-                cnt++;
-            }
+        if (adminService.getFailCount(adminInfo) >= maxFailCount) {
+            return "redirect:/";
         }
 
-        return "redirect:/";
+        if (adminService.login(session, adminInfo)) {
+            adminService.resetFailCount(adminInfo);
+            return "redirect:/admin/manage";
+        } else {
+            adminService.IncrementFailCount(adminInfo);
+            return "redirect:/";
+        }
     }
 
     @GetMapping("/manage")

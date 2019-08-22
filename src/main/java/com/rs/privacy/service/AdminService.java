@@ -18,16 +18,36 @@ public class AdminService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public boolean login(HttpSession session, AdminInfo adminInfo) {
-        AdminInfo savedAdminInfo = adminInfoRepository.findById(adminInfo.getId()).orElseThrow(RuntimeException::new);
+    public Boolean login(HttpSession session, AdminInfo adminInfo) {
+        AdminInfo savedAdminInfo = adminInfoRepository.findById(adminInfo.getId())
+                .orElseThrow(RuntimeException::new);
 
         if (passwordEncoder.matches(adminInfo.getPw(), savedAdminInfo.getPw())) {
             session.setAttribute(HttpSessionUtils.USER_SESSION_KEY, savedAdminInfo);
-
             return true;
         }
-
         return false;
     }
 
+    public Integer getFailCount(AdminInfo adminInfo) {
+        AdminInfo savedAdminInfo = adminInfoRepository.findById(adminInfo.getId())
+                .orElseThrow(RuntimeException::new);
+        return savedAdminInfo.getFailCount();
+    }
+
+    public void IncrementFailCount(AdminInfo adminInfo) {
+        AdminInfo savedAdminInfo = adminInfoRepository.findById(adminInfo.getId())
+                .orElseThrow(RuntimeException::new);
+
+        savedAdminInfo.setFailCount(savedAdminInfo.getFailCount() + 1);
+        adminInfoRepository.save(savedAdminInfo);
+    }
+
+    public void resetFailCount(AdminInfo adminInfo) {
+        AdminInfo savedAdminInfo = adminInfoRepository.findById(adminInfo.getId())
+                .orElseThrow(RuntimeException::new);
+
+        savedAdminInfo.setFailCount(0);
+        adminInfoRepository.save(savedAdminInfo);
+    }
 }
