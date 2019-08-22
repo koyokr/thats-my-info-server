@@ -93,7 +93,7 @@
                     <resourceGroup>KISA</resourceGroup>
                     <appName>rs-privacy</appName>
                     <region>koreacentral</region>
-                    <pricingTier>B1</pricingTier>
+                    <pricingTier>P1V2</pricingTier>
                     <runtime>
                         <os>linux</os>
                         <javaVersion>java11</javaVersion>
