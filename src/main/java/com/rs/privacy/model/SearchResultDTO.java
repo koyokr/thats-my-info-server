@@ -8,13 +8,13 @@ import java.util.List;
 
 @Getter
 @Setter
-public class SearchResult {
+public class SearchResultDTO {
     private String siteName;
     private String url;
     private List<String> contents;
     private Long numOfContents;
 
-    public SearchResult(String siteName, String url) {
+    public SearchResultDTO(String siteName, String url) {
         this.siteName = siteName;
         this.url = url;
         contents = new ArrayList();

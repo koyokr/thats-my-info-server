@@ -1,9 +1,10 @@
 package com.rs.privacy.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.rs.privacy.model.PersonDTO;
-import com.rs.privacy.model.SearchResult;
 import com.rs.privacy.model.PerosnTokenDTO;
+import com.rs.privacy.model.PersonDTO;
+import com.rs.privacy.model.SearchResultDTO;
+import com.rs.privacy.model.TotalSearchResultDTO;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -33,31 +34,70 @@ public class SearchService {
     @Autowired
     private RestTemplateBuilder restTemplateBuilder;
 
-    public List<SearchResult> search(PerosnTokenDTO perosnTokenDTO) {
+    public List<SearchResultDTO> searchOld(PerosnTokenDTO perosnTokenDTO) {
         PersonDTO personDTO = getSearchDTO(perosnTokenDTO);
         if (personDTO == null) {
             return null;
         }
-        String id = personDTO.getNaverId();
+        String naverId = personDTO.getNaverId();
 
-        List<SearchResult> resultList = new ArrayList<>();
-        resultList.add(crawlBing(id));
-        resultList.add(crawlClien(id));
-        resultList.add(crawlDaumCafe(id));
-        resultList.add(crawlDaumPaper(id));
-        resultList.add(crawlDaumSite(id));
-        resultList.add(crawlDC(id));
-        resultList.add(crawlIlbe(id));
-        resultList.add(crawlNaverCafe(id, "22830216"));
-        resultList.add(crawlNaverCafe(id, "10050146"));
-        resultList.add(crawlNaverCafe(id, "10050813"));
-        resultList.add(crawlNaverCafe(id, "11262350"));
-        resultList.add(crawlNaverKin(id));
-        resultList.add(crawlNaverSearch(id));
-        resultList.add(crawlTodayHumor(id));
-        resultList.add(crawlTwitter(id));
+        List<SearchResultDTO> resultList = new ArrayList<>();
+        resultList.add(crawlBing(naverId));
+        resultList.add(crawlClien(naverId));
+        resultList.add(crawlDaumCafe(naverId));
+        resultList.add(crawlDaumPaper(naverId));
+        resultList.add(crawlDaumSite(naverId));
+        resultList.add(crawlDC(naverId));
+        resultList.add(crawlIlbe(naverId));
+        resultList.add(crawlNaverCafe(naverId, "22830216"));
+        resultList.add(crawlNaverCafe(naverId, "10050146"));
+        resultList.add(crawlNaverCafe(naverId, "10050813"));
+        resultList.add(crawlNaverCafe(naverId, "11262350"));
+        resultList.add(crawlNaverKin(naverId));
+        resultList.add(crawlNaverSearch(naverId));
+        resultList.add(crawlTodayHumor(naverId));
+        resultList.add(crawlTwitter(naverId));
 
         return resultList;
+    }
+
+    public TotalSearchResultDTO search(PerosnTokenDTO perosnTokenDTO) {
+        PersonDTO personDTO = getSearchDTO(perosnTokenDTO);
+        if (personDTO == null) {
+            return null;
+        }
+        String naverId = personDTO.getNaverId();
+        if (!existsNaverId(naverId)) {
+            return null;
+        }
+
+        List<SearchResultDTO> searchResults = new ArrayList<>();
+        searchResults.add(crawlBing(naverId));
+        searchResults.add(crawlClien(naverId));
+        searchResults.add(crawlDaumCafe(naverId));
+        searchResults.add(crawlDaumPaper(naverId));
+        searchResults.add(crawlDaumSite(naverId));
+        searchResults.add(crawlDC(naverId));
+        searchResults.add(crawlIlbe(naverId));
+        searchResults.add(crawlNaverCafe(naverId, "22830216"));
+        searchResults.add(crawlNaverCafe(naverId, "10050146"));
+        searchResults.add(crawlNaverCafe(naverId, "10050813"));
+        searchResults.add(crawlNaverCafe(naverId, "11262350"));
+        searchResults.add(crawlNaverKin(naverId));
+        searchResults.add(crawlNaverSearch(naverId));
+        searchResults.add(crawlTodayHumor(naverId));
+        searchResults.add(crawlTwitter(naverId));
+
+        return new TotalSearchResultDTO(personDTO, searchResults);
+    }
+
+    public Boolean existsNaverId(String naverId) {
+        String url = "https://nid.naver.com/user2/joinAjax.nhn?m=checkId&id=" + naverId;
+
+        RestTemplate restTemplate = restTemplateBuilder.build();
+        String result = restTemplate.getForObject(url, String.class);
+
+        return "NNNNN".equals(result);
     }
 
     private PersonDTO getSearchDTO(PerosnTokenDTO perosnTokenDTO) {
@@ -74,15 +114,14 @@ public class SearchService {
             return null;
         }
         JsonNode response = node.get("response");
-        PersonDTO personDTO = new PersonDTO(
+
+        return new PersonDTO(
                 perosnTokenDTO.getNaverId(),
                 perosnTokenDTO.getPhone(),
                 response.get("name").textValue(),
                 response.get("email").textValue(),
                 response.get("nickname").textValue()
         );
-
-        return personDTO;
     }
 
     private JsonNode getNode(String url, HttpHeaders headers) {
@@ -93,9 +132,8 @@ public class SearchService {
         if (!response.getStatusCode().is2xxSuccessful()) {
             return null;
         }
-        JsonNode node = response.getBody();
 
-        return node;
+        return response.getBody();
     }
 
     private Document getDocument(String url) {
@@ -110,9 +148,9 @@ public class SearchService {
         return html.replaceAll("<(/)?([a-zA-Z]*)(\\s[a-zA-Z]*=[^>]*)?(\\s)*(/)?>", "");
     }
 
-    private SearchResult crawlBing(String id) {
+    private SearchResultDTO crawlBing(String id) {
         String url = "https://www.bing.com/search?q=" + id;
-        SearchResult result = new SearchResult("빙 검색", url);
+        SearchResultDTO result = new SearchResultDTO("빙 검색", url);
 
         String urlApi = "https://api.cognitive.microsoft.com/bing/v7.0/search?q=" + id + "&mkt=ko-kr";
         HttpHeaders headers = new HttpHeaders();
@@ -135,9 +173,9 @@ public class SearchService {
         return result;
     }
 
-    private SearchResult crawlClien(String id) {
+    private SearchResultDTO crawlClien(String id) {
         String url = "https://www.clien.net/service/search?q=" + id;
-        SearchResult result = new SearchResult("클리앙", url);
+        SearchResultDTO result = new SearchResultDTO("클리앙", url);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -158,9 +196,9 @@ public class SearchService {
         return result;
     }
 
-    private SearchResult crawlDaumCafe(String id) {
+    private SearchResultDTO crawlDaumCafe(String id) {
         String url = "http://search.daum.net/search?w=cafe&q=" + id;
-        SearchResult result = new SearchResult("다음 카페", url);
+        SearchResultDTO result = new SearchResultDTO("다음 카페", url);
 
         String urlApi = "https://dapi.kakao.com/v2/search/cafe?query=" + id;
         HttpHeaders headers = new HttpHeaders();
@@ -180,9 +218,9 @@ public class SearchService {
         return result;
     }
 
-    private SearchResult crawlDaumPaper(String id) {
+    private SearchResultDTO crawlDaumPaper(String id) {
         String url = "https://search.daum.net/search?w=web&q=" + id;
-        SearchResult result = new SearchResult("다음 웹문서 검색", url);
+        SearchResultDTO result = new SearchResultDTO("다음 웹문서 검색", url);
 
         String urlApi = "https://dapi.kakao.com/v2/search/web?query=" + id;
         HttpHeaders headers = new HttpHeaders();
@@ -202,9 +240,9 @@ public class SearchService {
         return result;
     }
 
-    private SearchResult crawlDaumSite(String id) {
+    private SearchResultDTO crawlDaumSite(String id) {
         String url = "http://search.daum.net/search?w=site&q=" + id;
-        SearchResult result = new SearchResult("다음 사이트 검색", url);
+        SearchResultDTO result = new SearchResultDTO("다음 사이트 검색", url);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -225,9 +263,9 @@ public class SearchService {
         return result;
     }
 
-    private SearchResult crawlDC(String id) {
+    private SearchResultDTO crawlDC(String id) {
         String url = "https://gallog.dcinside.com/" + id;
-        SearchResult result = new SearchResult("디시인사이드", url);
+        SearchResultDTO result = new SearchResultDTO("디시인사이드", url);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -240,10 +278,8 @@ public class SearchService {
         }
         Iterator<Element> cb1 = element.select("div.cont.box1").iterator();
         Iterator<Element> cb2 = element.select("div.cont.box2").iterator();
-        Iterator<Element> cb3 = element.select("div.cont.box3 .date").iterator();
 
-        while (cb3.hasNext()) {
-            Element dateElement = cb3.next();
+        for (Element dateElement : element.select("div.cont.box3 .date")) {
             Element titleElement = cb1.next();
             Element contentElement = cb2.next();
             result.getContents().add(dateElement.text() + " " + titleElement.text() + " " + contentElement.text());
@@ -253,9 +289,9 @@ public class SearchService {
         return result;
     }
 
-    private SearchResult crawlIlbe(String id) {
+    private SearchResultDTO crawlIlbe(String id) {
         String url = "http://www.ilbe.com/list/ilbe?searchType=nick_name&search=" + id;
-        SearchResult result = new SearchResult("일베", url);
+        SearchResultDTO result = new SearchResultDTO("일베", url);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -279,41 +315,42 @@ public class SearchService {
         return result;
     }
 
-    private SearchResult crawlNaverCafe(String id, String clubId) {
+    private SearchResultDTO crawlNaverCafe(String id, String clubId) {
         String url = "https://m.cafe.naver.com/ArticleSearchList.nhn?search.searchBy=3" +
                 "&search.query=" + id +
                 "&search.clubid=" + clubId;
-        SearchResult result = new SearchResult("네이버 카페", url);
+        SearchResultDTO result = new SearchResultDTO("네이버 카페", url);
 
         Document doc = getDocument(url);
         if (doc == null) {
             return result;
         }
+        String cafeName = doc.getElementsByAttributeValue("name", "title").attr("content");
+        result.setSiteName(result.getSiteName() + " (" + cafeName + ")");
 
         Element element = doc.selectFirst("#articleList");
         if (element == null) {
             return result;
         }
-        Iterator<Element> date = element.select(".time").iterator();
-        Iterator<Element> title = element.select("div.post_area").iterator();
 
-        while (date.hasNext()) {
-            Element dateElement = date.next();
-            Element titleElement = title.next();
-            Element spanElement = titleElement.selectFirst("span.icon_txt");
-            if (spanElement != null) {
-                spanElement.remove();
+        Elements lis = element.select("ul.list_writer li");
+        for (Element li : lis) {
+            Element title = li.selectFirst("div.post_area");
+            Element time = element.selectFirst("span.time");
+            Element unuse = title.selectFirst("span.icon_txt");
+            if (unuse != null) {
+                unuse.remove();
             }
-            result.getContents().add(dateElement.text() + " " + titleElement.text());
+            result.getContents().add(time.text() + " " + title.text());
         }
         result.setNumOfContents();
 
         return result;
     }
 
-    private SearchResult crawlNaverKin(String id) {
+    private SearchResultDTO crawlNaverKin(String id) {
         String url = "https://kin.naver.com/profile/" + id;
-        SearchResult result = new SearchResult("네이버 지식인", url);
+        SearchResultDTO result = new SearchResultDTO("네이버 지식인", url);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -339,9 +376,9 @@ public class SearchService {
         return result;
     }
 
-    private SearchResult crawlNaverSearch(String id) {
+    private SearchResultDTO crawlNaverSearch(String id) {
         String url = "https://search.naver.com/search.naver?where=article&query=" + id;
-        SearchResult result = new SearchResult("네이버 검색", url);
+        SearchResultDTO result = new SearchResultDTO("네이버 검색", url);
 
         String urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + id;
         HttpHeaders headers = new HttpHeaders();
@@ -354,15 +391,15 @@ public class SearchService {
         for (JsonNode item : node.get("items")) {
             String title = item.get("title").textValue();
             String description = item.get("description").textValue();
-            result.getContents().add(title + " " + description);
+            result.getContents().add(removeTag(title + " " + description));
         }
         result.setNumOfContents();
         return result;
     }
 
-    private SearchResult crawlTodayHumor(String id) {
+    private SearchResultDTO crawlTodayHumor(String id) {
         String url = "http://www.todayhumor.co.kr/board/list.php?kind=search&keyfield=name&keyword=" + id;
-        SearchResult result = new SearchResult("오늘의유머", url);
+        SearchResultDTO result = new SearchResultDTO("오늘의유머", url);
 
         Document doc = getDocument(url);
         if (doc == null) {
@@ -379,9 +416,9 @@ public class SearchService {
         return result;
     }
 
-    private SearchResult crawlTwitter(String id) {
+    private SearchResultDTO crawlTwitter(String id) {
         String url = "https://twitter.com/" + id;
-        SearchResult result = new SearchResult("트위터", url);
+        SearchResultDTO result = new SearchResultDTO("트위터", url);
 
         Document doc = getDocument(url);
         if (doc == null) {

@@ -24,8 +24,3 @@ spring:
       charset: UTF-8
       enabled: true
       force: true
-
-server:
-  error:
-    whitelabel:
-      enabled: false
