@@ -22,6 +22,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,7 +44,7 @@ public class SolveService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public Boolean inNaver(SolveNaverDTO solveDTO) {
+    public Boolean naver(SolveNaverDTO solveDTO) {
         RestTemplate restTemplate = restTemplateBuilder.build();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Referer", REFERER_URL);
@@ -109,7 +110,7 @@ public class SolveService {
         return "SUCCESS".equals(result);
     }
 
-    public SiteAdminContactDTO getWhois(String url) {
+    public SiteAdminContactDTO contact(String url) {
         Pattern pattern = Pattern.compile("([\\w-]+\\.(?:(?:co|or|pe|ne|re|go|hs|ms|es|kg|sc|ac)\\.)?[\\w-]+)$");
 
         String host = UriComponentsBuilder.fromHttpUrl(url).build().getHost();
@@ -266,7 +267,7 @@ public class SolveService {
                 Pattern.compile("Tech Phone: (.+)"),
                 Pattern.compile("Phone: (.+)")
         );
-        List<Pattern> registrarPatterns = Arrays.asList(
+        List<Pattern> registrarPatterns = Collections.singletonList(
                 Pattern.compile("Registrar: (.+)")
         );
 
@@ -277,5 +278,4 @@ public class SolveService {
         contact.setRegistrar(getMatcherGroupFirst(registrarPatterns, whoisResult));
         return contact;
     }
-
 }

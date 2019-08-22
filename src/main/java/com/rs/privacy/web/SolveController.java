@@ -16,23 +16,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/solve")
 public class SolveController {
 
-    private final SolveService solveService;
-
     @Autowired
-    public SolveController(SolveService solveService) {
-        this.solveService = solveService;
-    }
+    private SolveService solveService;
 
-    @GetMapping("/in-naver")
-    public ResponseEntity<Boolean> inNaver(SolveNaverDTO solveNaverDTO) {
-        Boolean success = solveService.inNaver(solveNaverDTO);
+    @GetMapping("/naver")
+    public ResponseEntity<Boolean> naver(SolveNaverDTO solveNaverDTO) {
+        Boolean success = solveService.naver(solveNaverDTO);
 
         return ResponseUtils.makeResponseEntity(success, HttpStatus.OK);
     }
 
-    @GetMapping("/normal")
-    public ResponseEntity<SiteAdminContactDTO> normal(@RequestParam String url) {
-        SiteAdminContactDTO contact = solveService.getWhois(url);
+    @GetMapping("/contact")
+    public ResponseEntity<SiteAdminContactDTO> contact(@RequestParam String url) {
+        SiteAdminContactDTO contact = solveService.contact(url);
 
         return ResponseUtils.makeResponseEntity(contact, HttpStatus.OK);
     }

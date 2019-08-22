@@ -8,8 +8,8 @@ import javax.persistence.*;
 
 @Entity
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class PrivacyInfo {
 
     @Id

@@ -30,10 +30,10 @@ public class AdminController {
     @GetMapping
     public String main(HttpSession session) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
-            return "redirect:/";
+            return "index";
         }
 
-        return "index";
+        return "redirect:/admin/manage";
     }
 
     @PostMapping("/login")
@@ -41,22 +41,22 @@ public class AdminController {
         Integer maxFailCount = 5;
 
         if (adminService.getFailCount(adminInfo) >= maxFailCount) {
-            return "redirect:/";
+            return "redirect:/admin";
         }
 
         if (adminService.login(session, adminInfo)) {
             adminService.resetFailCount(adminInfo);
             return "redirect:/admin/manage";
         } else {
-            adminService.IncrementFailCount(adminInfo);
-            return "redirect:/";
+            adminService.incrementFailCount(adminInfo);
+            return "redirect:/admin";
         }
     }
 
     @GetMapping("/manage")
     public String manage(HttpSession session, Model model) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
-            return "redirect:/";
+            return "redirect:/admin";
         }
 
         model.addAttribute("privacyInfoList", privacyInfoService.findAll());
@@ -67,7 +67,7 @@ public class AdminController {
     @GetMapping("/manage/form")
     public String form(HttpSession session) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
-            return "redirect:/";
+            return "redirect:/admin";
         }
 
         return "/form";
@@ -76,7 +76,7 @@ public class AdminController {
     @PostMapping("/manage/form/upload")
     public String upload(HttpSession session, PrivacyInfoDTO privacyInfoDTO) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
-            return "redirect:/";
+            return "redirect:/admin";
         }
 
         privacyInfoService.create(privacyInfoDTO);
@@ -87,7 +87,7 @@ public class AdminController {
     @GetMapping("/manage/{id}")
     public String showPrivacyInfo(HttpSession session, @PathVariable Long id, Model model) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
-            return "redirect:/";
+            return "redirect:/admin";
         }
 
         model.addAttribute("privacyInfo", privacyInfoService.findById(id));
@@ -98,7 +98,7 @@ public class AdminController {
     @GetMapping("/manage/{id}/form")
     public String showUpdateForm(HttpSession session, @PathVariable Long id, Model model) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
-            return "redirect:/";
+            return "redirect:/admin";
         }
 
         model.addAttribute("privacyInfo", privacyInfoService.findById(id));
@@ -109,7 +109,7 @@ public class AdminController {
     @PutMapping("/manage/{id}/update")
     public String updatePrivacyInfo(HttpSession session, @PathVariable Long id, PrivacyInfoDTO privacyInfoDTO) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
-            return "redirect:/";
+            return "redirect:/admin";
         }
 
         privacyInfoService.update(id, privacyInfoDTO);
@@ -120,7 +120,7 @@ public class AdminController {
     @DeleteMapping("/manage/{id}/delete")
     public String deletePrivacyInfo(HttpSession session, @PathVariable Long id) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
-            return "redirect:/";
+            return "redirect:/admin";
         }
 
         privacyInfoService.delete(id);
@@ -131,7 +131,7 @@ public class AdminController {
     @GetMapping("/crawlNews")
     public String showCrawledNews(HttpSession session, Model model) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
-            return "redirect:/";
+            return "redirect:/admin";
         }
 
         model.addAttribute("newsList", newsService.findList());
@@ -142,7 +142,7 @@ public class AdminController {
     @GetMapping("/crawlNews/form")
     public String crawlNewsForm(HttpSession session) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
-            return "redirect:/";
+            return "redirect:/admin";
         }
 
         return "/newsForm";
@@ -151,7 +151,7 @@ public class AdminController {
     @PostMapping("/crawlNews/form/upload")
     public String uploadNews(HttpSession session, NewsDTO newsDTO) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
-            return "redirect:/";
+            return "redirect:/admin";
         }
 
         newsService.create(newsDTO);
@@ -162,7 +162,7 @@ public class AdminController {
     @GetMapping("/crawlNews/{id}")
     public String showNews(HttpSession session, @PathVariable Long id, Model model) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
-            return "redirect:/";
+            return "redirect:/admin";
         }
 
         model.addAttribute("crawlNews", newsService.findById(id));
@@ -173,7 +173,7 @@ public class AdminController {
     @GetMapping("/crawlNews/{id}/form")
     public String showUpdateCrawlForm(HttpSession session, @PathVariable Long id, Model model) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
-            return "redirect:/";
+            return "redirect:/admin";
         }
 
         model.addAttribute("crawlNews", newsService.findById(id));
@@ -184,7 +184,7 @@ public class AdminController {
     @PutMapping("/crawlNews/{id}/update")
     public String updateNews(HttpSession session, @PathVariable Long id, NewsDTO newsDTO) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
-            return "redirect:/";
+            return "redirect:/admin";
         }
 
         newsService.update(id, newsDTO);
@@ -195,7 +195,7 @@ public class AdminController {
     @DeleteMapping("/crawlNews/{id}/delete")
     public String deleteNews(HttpSession session, @PathVariable Long id) {
         if (!HttpSessionUtils.isSessionedUser(session)) {
-            return "redirect:/";
+            return "redirect:/admin";
         }
 
         newsService.delete(id);

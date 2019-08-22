@@ -24,22 +24,24 @@ spring:
       charset: UTF-8
       enabled: true
       force: true
+
   boot:
     admin:
       client:
         url: 'https://rs-privacy-admin.herokuapp.com'
         instance:
+          service-base-url: 'https://rs-privacy.azurewebsites.net'
           metadata:
             user:
-              name: 'joe'
-              password: 'my-secret-password'
-        username: 'admin'
-        password: 'admin-password'
+              name: 'azureadmin'
+              password: '@#$%WERT2345'
+        username: 'herokuadmin'
+        password: '#$%^ERTY3456'
 
   security:
     user:
-      name: 'joe'
-      password: 'my-secret-password'
+      name: 'azureadmin'
+      password: '$2a$10$o5JzuTK2IMUCAUTVx5YPD.TTBXUq8rHWOkSwNcZlMVpK/ScuL6fnO'
 
 management:
   endpoint:
@@ -49,3 +51,6 @@ management:
     web:
       exposure:
         include: '*'
+  info:
+    git:
+      mode: full
