@@ -24,3 +24,28 @@ spring:
       charset: UTF-8
       enabled: true
       force: true
+  boot:
+    admin:
+      client:
+        url: 'https://rs-privacy-admin.azurewebsites.net'
+        instance:
+          metadata:
+            user:
+              name: 'joe'
+              password: 'my-secret-password'
+        username: 'admin'
+        password: 'admin-password'
+
+  security:
+    user:
+      name: 'joe'
+      password: 'my-secret-password'
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
