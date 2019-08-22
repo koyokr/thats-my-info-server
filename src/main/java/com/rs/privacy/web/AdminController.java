@@ -38,8 +38,15 @@ public class AdminController {
 
     @PostMapping("/login")
     public String login(HttpSession session, AdminInfo adminInfo) {
-        if (adminService.login(session, adminInfo)) {
-            return "redirect:/admin/manage";
+        int cnt=0;
+
+        while(cnt<5) {
+            if (adminService.login(session, adminInfo)) {
+                return "redirect:/admin/manage";
+            }
+            else {
+                cnt++;
+            }
         }
 
         return "redirect:/";

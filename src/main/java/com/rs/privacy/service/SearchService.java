@@ -39,24 +39,37 @@ public class SearchService {
         if (personDTO == null) {
             return null;
         }
-        String naverId = personDTO.getNaverId();
+
+        //String naverId = personDTO.getNaverId();
+        //String naverName = personDTO.getName();
+        //String naverNickname= personDTO.getNickname();
+        //String naverPhonNumber= personDTO.getPhone();
+        //String naverEmail= personDTO.getEmail();
+
+        String naverId = "ferror";
+        String naverName = "최철민";
+        String naverNickname= "ferror_nick";
+        String naverPhonNumber= "010-5176-9926";
+        String naverEmail= "ferror@naver.com";
+
+        String url;
 
         List<SearchResultDTO> resultList = new ArrayList<>();
-        resultList.add(crawlBing(naverId));
-        resultList.add(crawlClien(naverId));
-        resultList.add(crawlDaumCafe(naverId));
-        resultList.add(crawlDaumPaper(naverId));
-        resultList.add(crawlDaumSite(naverId));
-        resultList.add(crawlDC(naverId));
-        resultList.add(crawlIlbe(naverId));
-        resultList.add(crawlNaverCafe(naverId, "22830216"));
-        resultList.add(crawlNaverCafe(naverId, "10050146"));
-        resultList.add(crawlNaverCafe(naverId, "10050813"));
-        resultList.add(crawlNaverCafe(naverId, "11262350"));
-        resultList.add(crawlNaverKin(naverId));
-        resultList.add(crawlNaverSearch(naverId));
-        resultList.add(crawlTodayHumor(naverId));
-        resultList.add(crawlTwitter(naverId));
+        resultList.add(crawlBing(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
+        //resultList.add(crawlClien(naverId));
+        //resultList.add(crawlDaumCafe(naverId));
+        //resultList.add(crawlDaumPaper(naverId));
+        //resultList.add(crawlDaumSite(naverId));
+        //resultList.add(crawlDC(naverId));
+        //resultList.add(crawlIlbe(naverId));
+        //resultList.add(crawlNaverCafe(naverId, "22830216"));
+        //resultList.add(crawlNaverCafe(naverId, "10050146"));
+        //resultList.add(crawlNaverCafe(naverId, "10050813"));
+        //resultList.add(crawlNaverCafe(naverId, "11262350"));
+        //resultList.add(crawlNaverKin(naverId));
+        resultList.add(crawlNaverSearch(naverId,  naverName,naverNickname, naverPhonNumber,naverEmail));
+        //resultList.add(crawlTodayHumor(naverId));
+        //resultList.add(crawlTwitter(naverId));
 
         return resultList;
     }
@@ -66,27 +79,38 @@ public class SearchService {
         if (personDTO == null) {
             return null;
         }
-        String naverId = personDTO.getNaverId();
+        //String naverId = personDTO.getNaverId();
+        //String naverName = personDTO.getName();
+        //String naverNickname= personDTO.getNickname();
+        //String naverPhonNumber= personDTO.getPhone();
+        //String naverEmail= personDTO.getEmail();
+
+        String naverId = "ferror";
+        String naverName = "최철민";
+        String naverNickname= "ferror";
+        String naverPhonNumber= "010-5176-9926";
+        String naverEmail= "ferror@naver.com";
+
         if (!existsNaverId(naverId)) {
             return null;
         }
 
         List<SearchResultDTO> searchResults = new ArrayList<>();
-        searchResults.add(crawlBing(naverId));
-        searchResults.add(crawlClien(naverId));
-        searchResults.add(crawlDaumCafe(naverId));
-        searchResults.add(crawlDaumPaper(naverId));
-        searchResults.add(crawlDaumSite(naverId));
-        searchResults.add(crawlDC(naverId));
-        searchResults.add(crawlIlbe(naverId));
-        searchResults.add(crawlNaverCafe(naverId, "22830216"));
-        searchResults.add(crawlNaverCafe(naverId, "10050146"));
-        searchResults.add(crawlNaverCafe(naverId, "10050813"));
-        searchResults.add(crawlNaverCafe(naverId, "11262350"));
-        searchResults.add(crawlNaverKin(naverId));
-        searchResults.add(crawlNaverSearch(naverId));
-        searchResults.add(crawlTodayHumor(naverId));
-        searchResults.add(crawlTwitter(naverId));
+        searchResults.add(crawlBing(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
+        //searchResults.add(crawlClien(naverId));
+        //searchResults.add(crawlDaumCafe(naverId));
+        //searchResults.add(crawlDaumPaper(naverId));
+        //searchResults.add(crawlDaumSite(naverId));
+        //searchResults.add(crawlDC(naverId));
+        //searchResults.add(crawlIlbe(naverId));
+        //searchResults.add(crawlNaverCafe(naverId, "22830216"));
+        //searchResults.add(crawlNaverCafe(naverId, "10050146"));
+        //searchResults.add(crawlNaverCafe(naverId, "10050813"));
+        //searchResults.add(crawlNaverCafe(naverId, "11262350"));
+        //searchResults.add(crawlNaverKin(naverId));
+        searchResults.add(crawlNaverSearch(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
+        //searchResults.add(crawlTodayHumor(naverId));
+        //searchResults.add(crawlTwitter(naverId));
 
         return new TotalSearchResultDTO(personDTO, searchResults);
     }
@@ -148,7 +172,7 @@ public class SearchService {
         return html.replaceAll("<(/)?([a-zA-Z]*)(\\s[a-zA-Z]*=[^>]*)?(\\s)*(/)?>", "");
     }
 
-    private SearchResultDTO crawlBing(String id) {
+    private SearchResultDTO crawlBing(String id, String naverName, String naverNickname, String naverPhonNumber, String naverEmail) {
         String url = "https://www.bing.com/search?q=" + id;
         SearchResultDTO result = new SearchResultDTO("빙 검색", url);
 
@@ -376,11 +400,20 @@ public class SearchService {
         return result;
     }
 
-    private SearchResultDTO crawlNaverSearch(String id) {
+    private SearchResultDTO crawlNaverSearch(String id, String naverName, String naverNickname, String naverPhonNumber, String naverEmail) {
         String url = "https://search.naver.com/search.naver?where=article&query=" + id;
         SearchResultDTO result = new SearchResultDTO("네이버 검색", url);
 
-        String urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + id;
+
+
+        //중복제거
+
+        List<String> overlap_Check = new ArrayList<String>();
+
+
+        //Search ID
+
+        String urlApi = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + id;
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
         headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
@@ -388,11 +421,178 @@ public class SearchService {
         if (node == null) {
             return result;
         }
+
         for (JsonNode item : node.get("items")) {
+            String link = item.get("link").textValue();
+
+            if(!overlap_Check.contains(link)){
+                String title = item.get("title").textValue();
+                String description = item.get("description").textValue();
+                result.getContents().add(removeTag(urlApi +" "+ title + " " + description));
+            }
+            overlap_Check.add(link);
+        }
+
+        //Search NickName
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json" + naverNickname;
+        headers = new HttpHeaders();
+        headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        for (JsonNode item : node.get("items")) {
+            String link = item.get("link").textValue();
+
+            if(!overlap_Check.contains(link)){
+                String title = item.get("title").textValue();
+                String description = item.get("description").textValue();
+                result.getContents().add(removeTag(urlApi +" "+ title + " " + description));
+            }
+            overlap_Check.add(link);
+        }
+
+        //Search PhoneNumber
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json" + "\"" + naverPhonNumber + "\"";
+        headers = new HttpHeaders();
+        headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+
+        for (JsonNode item : node.get("items")) {
+            String link = item.get("link").textValue();
+
+            if(!overlap_Check.contains(link)){
+                String title = item.get("title").textValue();
+                String description = item.get("description").textValue();
+                result.getContents().add(removeTag(urlApi +" "+ title + " " + description));
+            }
+            overlap_Check.add(link);
+        }
+        //Search Email
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json" + "\"" + naverEmail + "\"";
+        headers = new HttpHeaders();
+        headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+
+        for (JsonNode item : node.get("items")) {
+            String link = item.get("link").textValue();
+
+            if(!overlap_Check.contains(link)){
+                String title = item.get("title").textValue();
+                String description = item.get("description").textValue();
+                result.getContents().add(removeTag(urlApi +" "+ title + " " + description));
+            }
+            overlap_Check.add(link);
+        }
+
+        //Search ID + PhoneNumber
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json" + id + " " + "\"" + naverPhonNumber + "\"";
+        headers = new HttpHeaders();
+        headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+
+        for (JsonNode item : node.get("items")) {
+            String link = item.get("link").textValue();
             String title = item.get("title").textValue();
             String description = item.get("description").textValue();
-            result.getContents().add(removeTag(title + " " + description));
+            result.getContents().add(removeTag(urlApi +" "+ title + " " + description));
+
+            if(!overlap_Check.contains(link)){
+                //String title = item.get("title").textValue();
+                //String description = item.get("description").textValue();
+                //result.getContents().add(removeTag(urlApi +" "+ title + " " + description));
+            }
+            overlap_Check.add(link);
         }
+        //Search ID + Email
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json" + id + " " + "\"" + naverEmail + "\"";
+        headers = new HttpHeaders();
+        headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+
+        for (JsonNode item : node.get("items")) {
+            String link = item.get("link").textValue();
+
+            if(!overlap_Check.contains(link)){
+                String title = item.get("title").textValue();
+                String description = item.get("description").textValue();
+                result.getContents().add(removeTag(urlApi +" "+ title + " " + description));
+            }
+            overlap_Check.add(link);
+        }
+        //Search Name + PhonNumber
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json" + naverName + " " + "\"" + naverPhonNumber + "\"";
+        headers = new HttpHeaders();
+        headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+
+        for (JsonNode item : node.get("items")) {
+            String link = item.get("link").textValue();
+
+            if(!overlap_Check.contains(link)){
+                String title = item.get("title").textValue();
+                String description = item.get("description").textValue();
+                result.getContents().add(removeTag(urlApi +" "+ title + " " + description));
+            }
+            overlap_Check.add(link);
+        }
+        //Search Name + Email
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json" + naverName + " " + "\"" + naverEmail + "\"";
+        headers = new HttpHeaders();
+        headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+
+        for (JsonNode item : node.get("items")) {
+            String link = item.get("link").textValue();
+
+            if(!overlap_Check.contains(link)){
+                String title = item.get("title").textValue();
+                String description = item.get("description").textValue();
+                result.getContents().add(removeTag(urlApi +" " + title + " " + description));
+            }
+            overlap_Check.add(link);
+        }
+
+
         result.setNumOfContents();
         return result;
     }
