@@ -21,14 +21,13 @@ public class NaverLoginService {
 
     public String getAuthorizeUrl(String redirectUri) {
         String state = generateState();
-        String url = UriComponentsBuilder.fromHttpUrl("https://nid.naver.com/oauth2.0/authorize")
+
+        return UriComponentsBuilder.fromHttpUrl("https://nid.naver.com/oauth2.0/authorize")
                 .queryParam("response_type", "code")
                 .queryParam("client_id", CLIENT_ID)
                 .queryParam("redirect_uri", redirectUri)
                 .queryParam("state", state)
                 .build().toUriString();
-
-        return url;
     }
 
     public NaverLoginTokenDTO getToken(String code, String state) {
@@ -41,9 +40,8 @@ public class NaverLoginService {
                 .build().toUriString();
 
         RestTemplate restTemplate = restTemplateBuilder.build();
-        NaverLoginTokenDTO token = restTemplate.getForObject(url, NaverLoginTokenDTO.class);
 
-        return token;
+        return restTemplate.getForObject(url, NaverLoginTokenDTO.class);
     }
 
     private String generateState() {

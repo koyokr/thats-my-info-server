@@ -35,7 +35,7 @@ public class AdminService {
         return savedAdminInfo.getFailCount();
     }
 
-    public void IncrementFailCount(AdminInfo adminInfo) {
+    public void incrementFailCount(AdminInfo adminInfo) {
         AdminInfo savedAdminInfo = adminInfoRepository.findById(adminInfo.getId())
                 .orElseThrow(RuntimeException::new);
 

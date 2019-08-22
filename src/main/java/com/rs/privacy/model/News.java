@@ -31,8 +31,8 @@ public class News {
     private Timestamp createdAt;
 
     public News(NewsDTO newsDTO) {
-        this.title = newsDTO.getTitle();
-        this.content = newsDTO.getContent();
+        title = newsDTO.getTitle();
+        content = newsDTO.getContent();
     }
 
     public Timestamp getCreatedAt() {
@@ -40,7 +40,7 @@ public class News {
     }
 
     public void update(NewsDTO newsDTO) {
-        this.title = newsDTO.getTitle();
-        this.title = newsDTO.getContent();
+        title = newsDTO.getTitle();
+        content = newsDTO.getContent();
     }
 }

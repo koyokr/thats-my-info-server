@@ -48,7 +48,7 @@ public class AdminController {
             adminService.resetFailCount(adminInfo);
             return "redirect:/admin/manage";
         } else {
-            adminService.IncrementFailCount(adminInfo);
+            adminService.incrementFailCount(adminInfo);
             return "redirect:/";
         }
     }
