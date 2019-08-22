@@ -22,6 +22,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -266,7 +267,7 @@ public class SolveService {
                 Pattern.compile("Tech Phone: (.+)"),
                 Pattern.compile("Phone: (.+)")
         );
-        List<Pattern> registrarPatterns = Arrays.asList(
+        List<Pattern> registrarPatterns = Collections.singletonList(
                 Pattern.compile("Registrar: (.+)")
         );
 
