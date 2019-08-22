@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class SearchTokenDTO {
+public class PerosnTokenDTO {
     private String naverId;
     private String phone;
     private String accessToken;

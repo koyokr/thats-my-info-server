@@ -3,6 +3,7 @@ spring:
     url: 'jdbc:postgresql://privacy-postgre.postgres.database.azure.com:5432/privacy'
     username: 'koyo@privacy-postgre'
     password: '!@#$QWER1234'
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -13,11 +14,18 @@ spring:
             non_contextual_creation: true
         show_sql: true
     open-in-view: true
+
   mustache:
     suffix: .html
     cache: false
+
   http:
     encoding:
       charset: UTF-8
       enabled: true
       force: true
+
+server:
+  error:
+    whitelabel:
+      enabled: false

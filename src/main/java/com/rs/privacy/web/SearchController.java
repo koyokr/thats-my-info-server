@@ -1,7 +1,7 @@
 package com.rs.privacy.web;
 
 import com.rs.privacy.model.SearchResult;
-import com.rs.privacy.model.SearchTokenDTO;
+import com.rs.privacy.model.PerosnTokenDTO;
 import com.rs.privacy.service.SearchService;
 import com.rs.privacy.utils.ResponseUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +19,8 @@ public class SearchController {
     private SearchService searchService;
 
     @GetMapping("/search")
-    public ResponseEntity<List<SearchResult>> search(SearchTokenDTO searchTokenDTO) {
-        List<SearchResult> searchResultList = searchService.search(searchTokenDTO);
+    public ResponseEntity<List<SearchResult>> search(PerosnTokenDTO perosnTokenDTO) {
+        List<SearchResult> searchResultList = searchService.search(perosnTokenDTO);
 
         return ResponseUtils.makeResponseEntity(searchResultList, HttpStatus.OK);
     }
