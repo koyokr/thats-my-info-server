@@ -1,4 +1,4 @@
-package com.rs.privacyadmin.config;
+package com.rs.privacyadmin;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
