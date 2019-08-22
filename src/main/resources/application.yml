@@ -29,6 +29,7 @@ spring:
       client:
         url: 'https://rs-privacy-admin.herokuapp.com'
         instance:
+          service-base-url: 'https://rs-privacy.azurewebsites.net/'
           metadata:
             user:
               name: 'joe'
