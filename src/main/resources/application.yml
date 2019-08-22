@@ -27,7 +27,7 @@ spring:
   boot:
     admin:
       client:
-        url: 'https://rs-privacy-admin.azurewebsites.net'
+        url: 'https://rs-privacy-admin.herokuapp.com'
         instance:
           metadata:
             user:
