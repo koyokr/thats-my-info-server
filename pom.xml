@@ -74,31 +74,28 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.microsoft.azure</groupId>
-                <artifactId>azure-webapp-maven-plugin</artifactId>
-                <version>1.7.0</version>
-                <configuration>
-                    <schemaVersion>V2</schemaVersion>
-                    <resourceGroup>KISA</resourceGroup>
-                    <appName>rs-privacy-admin</appName>
-                    <region>koreacentral</region>
-                    <pricingTier>P1V2</pricingTier>
-                    <runtime>
-                        <os>linux</os>
-                        <javaVersion>java11</javaVersion>
-                        <webContainer>TOMCAT 9.0</webContainer>
-                    </runtime>
-                    <deployment>
-                        <resources>
-                            <resource>
-                                <directory>${project.basedir}/target</directory>
-                                <includes>
-                                    <include>*.war</include>
-                                </includes>
-                            </resource>
-                        </resources>
-                    </deployment>
-                </configuration>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>copy</goal></goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.github.jsimone</groupId>
+                                    <artifactId>webapp-runner</artifactId>
+                                    <version>9.0.24.0</version>
+                                    <destFileName>webapp-runner.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
