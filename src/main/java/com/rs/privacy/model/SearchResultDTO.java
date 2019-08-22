@@ -15,7 +15,7 @@ import java.util.List;
 public class SearchResultDTO {
     private String siteName;
     private String url;
-    private List<String> contents;
+    private List<ContentAndUrlDTO> contents;
     private Integer numOfContents;
 
     public SearchResultDTO(String siteName, String url) {
@@ -25,12 +25,12 @@ public class SearchResultDTO {
         numOfContents = 0;
     }
 
-    public void addContent(String content) {
+    public void addContent(String content, String url) {
         Integer maxLength = 40;
         if (content.length() > maxLength) {
             content = content.substring(0, maxLength);
         }
-        contents.add(content);
+        contents.add(new ContentAndUrlDTO(content, url));
         numOfContents = contents.size();
     }
 }

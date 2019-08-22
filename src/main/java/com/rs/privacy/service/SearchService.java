@@ -40,13 +40,26 @@ public class SearchService {
         if (personDTO == null) {
             return null;
         }
+
         String naverId = personDTO.getNaverId();
+        String naverName = personDTO.getName();
+        String naverNickname= personDTO.getNickname();
+        String naverPhonNumber= personDTO.getPhone();
+        String naverEmail= personDTO.getEmail();
+
+//        String naverId = "everpall";
+//        String naverName = "박성현";
+//        String naverNickname= "everpall";
+//        String naverPhonNumber= "010-4012-7157";
+//        String naverEmail= "everpall@naver.com";
+
+        String url;
 
         List<SearchResultDTO> resultList = new ArrayList<>();
-        resultList.add(crawlBing(naverId));
+        resultList.add(crawlBing(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
         resultList.add(crawlClien(naverId));
-        resultList.add(crawlDaumCafe(naverId));
-        resultList.add(crawlDaumPaper(naverId));
+        resultList.add(crawlDaumCafe(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
+        resultList.add(crawlDaumPaper(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
         resultList.add(crawlDaumSite(naverId));
         resultList.add(crawlDC(naverId));
         resultList.add(crawlIlbe(naverId));
@@ -55,9 +68,10 @@ public class SearchService {
         resultList.add(crawlNaverCafe(naverId, "10050813"));
         resultList.add(crawlNaverCafe(naverId, "11262350"));
         resultList.add(crawlNaverKin(naverId));
-        resultList.add(crawlNaverSearch(naverId));
+        resultList.add(crawlNaverSearch(naverId,  naverName,naverNickname, naverPhonNumber,naverEmail));
         resultList.add(crawlTodayHumor(naverId));
         resultList.add(crawlTwitter(naverId));
+        //resultList.add(crawlGoogleSearch(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
 
         return resultList;
     }
@@ -68,15 +82,26 @@ public class SearchService {
             return null;
         }
         String naverId = personDTO.getNaverId();
+        String naverName = personDTO.getName();
+        String naverNickname= personDTO.getNickname();
+        String naverPhonNumber= personDTO.getPhone();
+        String naverEmail= personDTO.getEmail();
+
+//        String naverId = "everpall";
+//        String naverName = "박성현";
+//        String naverNickname= "everpall";
+//        String naverPhonNumber= "010-4012-7157";
+//        String naverEmail= "everpall@naver.com";
+
         if (!existsNaverId(naverId)) {
             return null;
         }
 
         List<SearchResultDTO> searchResults = new ArrayList<>();
-        searchResults.add(crawlBing(naverId));
+        searchResults.add(crawlBing(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
         searchResults.add(crawlClien(naverId));
-        searchResults.add(crawlDaumCafe(naverId));
-        searchResults.add(crawlDaumPaper(naverId));
+        searchResults.add(crawlDaumCafe(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
+        searchResults.add(crawlDaumPaper(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
         searchResults.add(crawlDaumSite(naverId));
         searchResults.add(crawlDC(naverId));
         searchResults.add(crawlIlbe(naverId));
@@ -85,9 +110,10 @@ public class SearchService {
         searchResults.add(crawlNaverCafe(naverId, "10050813"));
         searchResults.add(crawlNaverCafe(naverId, "11262350"));
         searchResults.add(crawlNaverKin(naverId));
-        searchResults.add(crawlNaverSearch(naverId));
+        searchResults.add(crawlNaverSearch(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
         searchResults.add(crawlTodayHumor(naverId));
         searchResults.add(crawlTwitter(naverId));
+        //searchResults.add(crawlGoogleSearch(naverId, naverName, naverNickname, naverPhonNumber,naverEmail));
 
         return new TotalSearchResultDTO(personDTO, searchResults);
     }
@@ -165,7 +191,7 @@ public class SearchService {
         return html.replaceAll("<(/)?([a-zA-Z]*)(\\s[a-zA-Z]*=[^>]*)?(\\s)*(/)?>", "");
     }
 
-    private SearchResultDTO crawlBing(String id) {
+    private SearchResultDTO crawlBing(String id, String naverName, String naverNickname, String naverPhonNumber, String naverEmail) {
         String url = "https://www.bing.com/search?q=" + id;
         SearchResultDTO result = new SearchResultDTO("빙 검색", url);
 
@@ -184,7 +210,8 @@ public class SearchService {
         for (JsonNode value : webPages.get("value")) {
             String name = value.get("name").textValue();
             String snippet = value.get("snippet").textValue();
-            result.addContent(name + " " + snippet);
+            String url_temp = "";
+            result.addContent(name + " " + snippet, url_temp);
         }
         return result;
     }
@@ -204,15 +231,21 @@ public class SearchService {
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element titleElement = title.next();
-            result.addContent(dateElement.text() + " " + titleElement.text());
+            String url_temp = "";
+            result.addContent(dateElement.text() + " " + titleElement.text(), url_temp);
         }
         return result;
     }
 
-    private SearchResultDTO crawlDaumCafe(String id) {
+    private SearchResultDTO crawlDaumCafe(String id, String naverName, String naverNickname, String naverPhonNumber, String naverEmail) {
         String url = "http://search.daum.net/search?w=cafe&q=" + id;
         SearchResultDTO result = new SearchResultDTO("다음 카페", url);
 
+        //중복제거
+
+        List<String> overlap_Check = new ArrayList<String>();
+
+        // ID
         String urlApi = "https://dapi.kakao.com/v2/search/cafe?query=" + id;
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "KakaoAK " + KAKAO_REST_API_KEY);
@@ -221,18 +254,278 @@ public class SearchService {
         if (node == null) {
             return result;
         }
-        for (JsonNode document : node.get("documents")) {
-            String cafeName = document.get("cafename").textValue();
-            String contents = document.get("contents").textValue();
-            result.addContent(removeTag(cafeName + " " + contents));
+
+        JsonNode total_num_json = node.get("meta");
+        int total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+
+
+        // Nick name
+        urlApi = "https://dapi.kakao.com/v2/search/cafe?query=" + naverNickname;
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // Phone Number
+        urlApi = "https://dapi.kakao.com/v2/search/cafe?query=" + "\"" + naverPhonNumber + "\"";;
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 10){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // E-mail
+
+        // Name, Phone number
+        urlApi = "https://dapi.kakao.com/v2/search/cafe?query=" + naverName + " " + "\"" + naverPhonNumber + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // Name, E-mail
+        urlApi = "https://dapi.kakao.com/v2/search/cafe?query=" + naverName + " " + "\"" + naverEmail + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // Name, ID
+        urlApi = "https://dapi.kakao.com/v2/search/cafe?query=" + naverName + " " + "\"" + id + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // Nickname + Phone number
+        urlApi = "https://dapi.kakao.com/v2/search/cafe?query=" + naverNickname + " " + "\"" + naverPhonNumber + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // Nickname + E-mail
+        urlApi = "https://dapi.kakao.com/v2/search/cafe?query=" + naverNickname + " " + "\"" + naverEmail + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // Nickname + ID
+        urlApi = "https://dapi.kakao.com/v2/search/cafe?query=" + naverNickname + " " + "\"" + id + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // Phone Number + ID
+        urlApi = "https://dapi.kakao.com/v2/search/cafe?query=" + "\"" + naverPhonNumber + "\"" + " " + "\"" + id + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // E-mail + ID
+        urlApi = "https://dapi.kakao.com/v2/search/cafe?query=" + "\"" + naverEmail + "\"" + " " + "\"" + id + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
         }
         return result;
     }
 
-    private SearchResultDTO crawlDaumPaper(String id) {
+    private SearchResultDTO crawlDaumPaper(String id, String naverName, String naverNickname, String naverPhonNumber, String naverEmail) {
         String url = "https://search.daum.net/search?w=web&q=" + id;
         SearchResultDTO result = new SearchResultDTO("다음 웹문서 검색", url);
 
+        //중복제거
+
+        List<String> overlap_Check = new ArrayList<String>();
+
+        // ID
         String urlApi = "https://dapi.kakao.com/v2/search/web?query=" + id;
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "KakaoAK " + KAKAO_REST_API_KEY);
@@ -241,11 +534,290 @@ public class SearchService {
         if (node == null) {
             return result;
         }
-        for (JsonNode document : node.get("documents")) {
-            String title = document.get("title").textValue();
-            String contents = document.get("contents").textValue();
-            result.addContent(removeTag(title + " " + contents));
+
+        JsonNode total_num_json = node.get("meta");
+        int total_paper = total_num_json.get("total_count").intValue();
+
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
         }
+
+
+
+        // Nick name
+        urlApi = "https://dapi.kakao.com/v2/search/web?query=" + naverNickname;
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // Phone Number
+        urlApi = "https://dapi.kakao.com/v2/search/web?query=" + "\"" + naverPhonNumber + "\"";;
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // E-mail
+        urlApi = "https://dapi.kakao.com/v2/search/web?query=" + "\"" + naverEmail + "\"";;
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // Name, Phone number
+        urlApi = "https://dapi.kakao.com/v2/search/web?query=" + naverName + " " + "\"" + naverPhonNumber + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // Name, E-mail
+        urlApi = "https://dapi.kakao.com/v2/search/web?query=" + naverName + " " + "\"" + naverEmail + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // Name, ID
+        urlApi = "https://dapi.kakao.com/v2/search/web?query=" + naverName + " " + "\"" + id + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // Nickname + Phone number
+        urlApi = "https://dapi.kakao.com/v2/search/web?query=" + naverNickname + " " + "\"" + naverPhonNumber + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // Nickname + E-mail
+        urlApi = "https://dapi.kakao.com/v2/search/web?query=" + naverNickname + " " + "\"" + naverEmail + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // Nickname + ID
+        urlApi = "https://dapi.kakao.com/v2/search/web?query=" + naverNickname + " " + "\"" + id + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // Phone Number + ID
+        urlApi = "https://dapi.kakao.com/v2/search/web?query=" + "\"" + naverPhonNumber + "\"" + " " + "\"" + id + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        // E-mail + ID
+        urlApi = "https://dapi.kakao.com/v2/search/web?query=" + "\"" + naverEmail + "\"" + " " + "\"" + id + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_num_json = node.get("meta");
+        total_paper = total_num_json.get("total_count").intValue();
+
+        if(total_paper < 100){
+            for (JsonNode document : node.get("documents")) {
+                String link = document.get("url").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = document.get("title").textValue();
+                    String contents = document.get("contents").textValue();
+                    result.addContent(removeTag(title + " " + contents), link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
         return result;
     }
 
@@ -264,7 +836,8 @@ public class SearchService {
         while (content.hasNext()) {
             Element contentElement = content.next();
             Element fUrlElement = fUrl.next();
-            result.addContent(contentElement.text() + " " + fUrlElement.text());
+            String url_temp = "";
+            result.addContent(contentElement.text() + " " + fUrlElement.text(), url_temp);
         }
         return result;
     }
@@ -287,7 +860,8 @@ public class SearchService {
         for (Element dateElement : element.select("div.cont.box3 .date")) {
             Element titleElement = cb1.next();
             Element contentElement = cb2.next();
-            result.addContent(dateElement.text() + " " + titleElement.text() + " " + contentElement.text());
+            String url_temp = "";
+            result.addContent(dateElement.text() + " " + titleElement.text() + " " + contentElement.text(),url_temp);
         }
         return result;
     }
@@ -311,7 +885,8 @@ public class SearchService {
         while (date.hasNext()) {
             Element dateElement = date.next();
             Element contentElement = content.next();
-            result.addContent(dateElement.text() + " " + contentElement.text());
+            String url_temp = "";
+            result.addContent(dateElement.text() + " " + contentElement.text(),url_temp);
         }
         return result;
     }
@@ -342,7 +917,8 @@ public class SearchService {
             if (unuse != null) {
                 unuse.remove();
             }
-            result.addContent(time.text() + " " + title.text());
+            String url_temp = "";
+            result.addContent(time.text() + " " + title.text(),url_temp);
         }
         return result;
     }
@@ -368,16 +944,25 @@ public class SearchService {
             Element dateElement = date.next();
             Element contentElementQ = contentQ.next();
             Element contentElementA = contentA.next();
-            result.addContent(dateElement.text() + " Q:" + contentElementQ.text() + " A:" + contentElementA.text());
+            String url_temp = "";
+            result.addContent(dateElement.text() + " Q:" + contentElementQ.text() + " A:" + contentElementA.text(),url_temp);
         }
         return result;
     }
 
-    private SearchResultDTO crawlNaverSearch(String id) {
+    private SearchResultDTO crawlNaverSearch(String id, String naverName, String naverNickname, String naverPhonNumber, String naverEmail) {
         String url = "https://search.naver.com/search.naver?where=article&query=" + id;
         SearchResultDTO result = new SearchResultDTO("네이버 검색", url);
 
-        String urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + id;
+
+        //중복제거
+
+        List<String> overlap_Check = new ArrayList<String>();
+
+
+        //Search ID
+
+        String urlApi = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + id;
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
         headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
@@ -386,11 +971,675 @@ public class SearchService {
         if (node == null) {
             return result;
         }
-        for (JsonNode item : node.get("items")) {
-            String title = item.get("title").textValue();
-            String description = item.get("description").textValue();
-            result.addContent(removeTag(title + " " + description));
+        JsonNode total_json = node.get("total");
+        int total_paper = total_json.intValue();
+
+
+
+        if(total_paper < 100){
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(total_paper + title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
         }
+
+
+
+        //Search NickName
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + naverNickname;
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+
+
+        if(total_paper < 100){
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+
+
+        //Search PhoneNumber
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + "\"" + naverPhonNumber + "\"";
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if (!overlap_Check.contains(link)) {
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+
+
+        //Search Email
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + "\"" + naverEmail + "\"";
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+
+
+
+        //Search ID + PhoneNumber
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + id + " " + "\"" + naverPhonNumber + "\"";
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+
+
+        //Search ID + Email
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + id + " " + "\"" + naverEmail + "\"";
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if (!overlap_Check.contains(link)) {
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+
+
+        //Search Name + PhonNumber
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + naverName + " " + "\"" + naverPhonNumber + "\"";
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+
+        //Search Name + Email
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + naverName + " " + "\"" + naverEmail + "\"";
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if (!overlap_Check.contains(link)) {
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        //Search Name + ID
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + naverName + " " + id;
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if (!overlap_Check.contains(link)) {
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        //Search NickName + ID
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + naverNickname + " " + id;
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if (!overlap_Check.contains(link)) {
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        //Search NickName + Email
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + naverNickname + " " + "\"" + naverEmail + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if (!overlap_Check.contains(link)) {
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        //Search NickName + Phone
+
+        urlApi = "https://openapi.naver.com/v1/search/cafearticle.json?query=" + naverNickname + " " + "\"" + naverPhonNumber + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if (!overlap_Check.contains(link)) {
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        //Web Site Search!!
+
+        //Search ID
+
+        urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + id;
+        headers = new HttpHeaders();
+        headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+
+
+        if(total_paper < 100){
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+
+
+        //Search NickName
+
+        urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + naverNickname;
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+
+
+        if(total_paper < 100){
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+
+
+        //Search PhoneNumber
+
+        urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + "\"" + naverPhonNumber + "\"";
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if (!overlap_Check.contains(link)) {
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+
+
+        //Search Email
+
+        urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + "\"" + naverEmail + "\"";
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+
+
+
+        //Search ID + PhoneNumber
+
+        urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + id + " " + "\"" + naverPhonNumber + "\"";
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+
+
+        //Search ID + Email
+
+        urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + id + " " + "\"" + naverEmail + "\"";
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if (!overlap_Check.contains(link)) {
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+
+
+        //Search Name + PhonNumber
+
+        urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + naverName + " " + "\"" + naverPhonNumber + "\"";
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if(!overlap_Check.contains(link)){
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+
+        //Search Name + Email
+
+        urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + naverName + " " + "\"" + naverEmail + "\"";
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if (!overlap_Check.contains(link)) {
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        //Search Name + ID
+
+        urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + naverName + " " + id;
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if (!overlap_Check.contains(link)) {
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        //Search NickName + ID
+
+        urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + naverNickname + " " + id;
+        //headers = new HttpHeaders();
+        //headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
+        //headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if (!overlap_Check.contains(link)) {
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        //Search NickName + Email
+
+        urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + naverNickname + " " + "\"" + naverEmail + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if (!overlap_Check.contains(link)) {
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+        //Search NickName + Phone
+
+        urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + naverNickname + " " + "\"" + naverPhonNumber + "\"";
+
+        node = getNode(urlApi, headers);
+        if (node == null) {
+            return result;
+        }
+
+        total_json = node.get("total");
+        total_paper = total_json.intValue();
+
+        if(total_paper < 100) {
+            for (JsonNode item : node.get("items")) {
+                String link = item.get("link").textValue();
+
+                if (!overlap_Check.contains(link)) {
+                    String title = item.get("title").textValue();
+                    String description = item.get("description").textValue();
+                    result.addContent(removeTag(title + " " + description),link);
+                }
+                overlap_Check.add(link);
+            }
+        }
+
+
+
         return result;
     }
 
@@ -406,7 +1655,8 @@ public class SearchService {
         for (Element view : views) {
             Element subject = view.selectFirst("td.subject a");
             Element date = view.selectFirst("td.date");
-            result.addContent(subject.text() + " " + date.text());
+            String url_temp = "";
+            result.addContent(subject.text() + " " + date.text(), url_temp);
         }
         return result;
     }
@@ -424,8 +1674,11 @@ public class SearchService {
             return result;
         }
         for (Element content : element.select("div.js-tweet-text-container")) {
-            result.addContent(content.text());
+            String url_temp = "";
+            result.addContent(content.text(),url_temp);
         }
         return result;
     }
+
+
 }
