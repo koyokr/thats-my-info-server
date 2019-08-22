@@ -12,9 +12,9 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +26,9 @@ public class SearchService {
 
     private final static String NAVER_CLIENT_ID = "iiTpSGlHgIkuycXWTh3N";
     private final static String NAVER_CLIENT_SECRET = "34ZpK2RcPz";
+    private final static String KAKAO_REST_API_KEY = "d97e7d7df1703411d17522aa8c12e3f6";
     private final static String AZURE_BING_SEARCH_KEY = "01aefdbbc9ae4a9283582e2bb50d853d";
+
 
     @Autowired
     private RestTemplateBuilder restTemplateBuilder;
@@ -80,20 +82,33 @@ public class SearchService {
         );
     }
 
-    private SearchResult crawlBing(String id) {
-        String urlView = "https://www.bing.com/search?q=" + id;
-        SearchResult result = new SearchResult("빙 검색", urlView);
+    private JsonNode getNode(String url, HttpHeaders headers) {
+        RestTemplate restTemplate = restTemplateBuilder.build();
+        HttpEntity entity = new HttpEntity(headers);
+        ResponseEntity<JsonNode> response = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class);
+        return response.getBody();
+    }
 
-        String url = UriComponentsBuilder.fromHttpUrl("https://api.cognitive.microsoft.com/bing/v7.0/search")
-                .queryParam("q", id)
-                .queryParam("mkt", "ko-kr")
-                .build().toUriString();
+    private Document getDocument(String url) {
+        try {
+            return Jsoup.connect(url).get();
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private String removeTag(String html) {
+        return html.replaceAll("<(/)?([a-zA-Z]*)(\\s[a-zA-Z]*=[^>]*)?(\\s)*(/)?>", "");
+    }
+
+    private SearchResult crawlBing(String id) {
+        String url = "https://www.bing.com/search?q=" + id;
+        SearchResult result = new SearchResult("빙 검색", url);
+
+        String urlApi = "https://api.cognitive.microsoft.com/bing/v7.0/search?q=" + id + "&mkt=ko-kr";
         HttpHeaders headers = new HttpHeaders();
         headers.set("Ocp-Apim-Subscription-Key", AZURE_BING_SEARCH_KEY);
-        HttpEntity entity = new HttpEntity(headers);
-
-        RestTemplate restTemplate =  restTemplateBuilder.build();
-        JsonNode node = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class).getBody();
+        JsonNode node = getNode(urlApi, headers);
 
         JsonNode pages = node.get("webPages");
         if (pages == null) {
@@ -135,23 +150,15 @@ public class SearchService {
         String url = "http://search.daum.net/search?w=cafe&nil_search=btn&DA=NTB&enc=utf8&ASearchType=1&lpp=10&rlang=0&q=" + id;
         SearchResult result = new SearchResult("다음 카페", url);
 
+        String urlApi = "https://dapi.kakao.com/v2/search/cafe?query=" + id;
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "KakaoAK " + KAKAO_REST_API_KEY);
+        JsonNode node = getNode(urlApi, headers);
 
-        Document doc = getDocument(url);
-        if (doc == null) {
-            return result;
-        }
-
-        Element element = doc.selectFirst("#cafeResultUL");
-        if (element == null) {
-            return result;
-        }
-        Iterator<Element> date = element.select(".f_nb.date").iterator();
-        Iterator<Element> title = element.select(".wrap_tit.mg_tit").iterator();
-
-        while (date.hasNext()) {
-            Element dateElement = date.next();
-            Element titleElement = title.next();
-            result.getContents().add(dateElement.text() + " " + titleElement.text());
+        for (JsonNode document : node.get("documents")) {
+            String cafename = document.get("cafename").textValue();
+            String contents = document.get("contents").textValue();
+            result.getContents().add(removeTag(cafename + " " + contents));
         }
         result.setNumOfContents();
 
@@ -212,6 +219,9 @@ public class SearchService {
         }
 
         Element element = doc.selectFirst("#container");
+        if (element == null) {
+            return result;
+        }
         Iterator<Element> cb1 = element.select("div.cont.box1").iterator();
         Iterator<Element> cb2 = element.select("div.cont.box2").iterator();
         Iterator<Element> cb3 = element.select("div.cont.box3 .date").iterator();
@@ -314,23 +324,18 @@ public class SearchService {
     }
 
     private SearchResult crawlNaverSearch(String id) {
-        String urlView = "https://search.naver.com/search.naver?where=article&query=" + id;
-        SearchResult result = new SearchResult("빙 검색", urlView);
+        String url = "https://search.naver.com/search.naver?where=article&query=" + id;
+        SearchResult result = new SearchResult("빙 검색", url);
 
-        String url = UriComponentsBuilder.fromHttpUrl("https://openapi.naver.com/v1/search/webkr.json")
-                .queryParam("query", id).build().toUriString();
-
+        String urlApi = "https://openapi.naver.com/v1/search/webkr.json?query=" + id;
         HttpHeaders headers = new HttpHeaders();
         headers.set("X-Naver-Client-Id", NAVER_CLIENT_ID);
         headers.set("X-Naver-Client-Secret", NAVER_CLIENT_SECRET);
-        HttpEntity entity = new HttpEntity(headers);
+        JsonNode node = getNode(urlApi, headers);
 
-        RestTemplate restTemplate =  restTemplateBuilder.build();
-        JsonNode node = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class).getBody();
-
-        for (JsonNode value : node.get("items")) {
-            String title = value.get("title").textValue();
-            String description = value.get("description").textValue();
+        for (JsonNode item : node.get("items")) {
+            String title = item.get("title").textValue();
+            String description = item.get("description").textValue();
             result.getContents().add(title + " " + description);
         }
         result.setNumOfContents();
@@ -338,7 +343,7 @@ public class SearchService {
     }
 
     private SearchResult crawlTodayHumor(String id) {
-        String url = "http://www.todayhumor.co.kr/board/list.php?kind=search&keyfield=name&keyword=" + id + "&Submit.x=0&Submit.y=0";
+        String url = "http://www.todayhumor.co.kr/board/list.php?kind=search&keyfield=name&keyword=" + id;
         SearchResult result = new SearchResult("오늘의유머", url);
 
         Document doc = getDocument(url);
@@ -370,6 +375,9 @@ public class SearchService {
         }
 
         Element element = doc.selectFirst("div.js-tweet-text-container");
+        if (element == null) {
+            return result;
+        }
         Iterator<Element> content = element.select("div.js-tweet-text-container").iterator();
 
         while (content.hasNext()) {
@@ -379,13 +387,5 @@ public class SearchService {
         result.setNumOfContents();
 
         return result;
-    }
-
-    private Document getDocument(String url) {
-        try {
-            return Jsoup.connect(url).get();
-        } catch (IOException e) {
-            return null;
-        }
     }
 }
