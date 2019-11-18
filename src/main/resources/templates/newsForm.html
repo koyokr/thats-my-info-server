@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="kr">
+<head>
+    <meta charset="UTF-8">
+    <title>Privacy Admin Page</title>
+    <link rel="stylesheet" href="/css/bootstrap.css">
+</head>
+<body>
+<nav class="navbar navbar-fixed-top header">
+    <div class="col-md-12">
+        <div class="navbar-header">
+            <a href="/admin/manage" class="navbar-brand">님아 그것은 내정보</a>
+        </div>
+        <div class="collapse navbar-collapse" id="navbar-collapse2">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/admin/manage" role="button">개인정보 지식글</a></li>
+                <li><a href="/admin/crawlNews" role="button">뉴스 크롤링</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="navbar navbar-default" id="subnav">
+    <div class="col-md-12">
+    </div>
+</div>
+<div class=container>
+    <div class="panel panel-default content-main">
+        <form name="posts" method="post" action="/admin/crawlNews/form/upload">
+            <div class="form-group">
+                <label for="title">제목</label>
+                <input type="text" class="form-control" id="title" name="title" placeholder="제목"/>
+            </div>
+            <div class="form-group">
+                <label for="title">내용</label>
+                <input type="text" class="form-control" id="content" name="content" style="height: 350px" placeholder="내용"/>
+            </div>
+            <button type="submit" class="btn btn-default clearfix pull-right">글쓰기</button>
+            <div class="clearfix"/>
+        </form>
+    </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script type="/text/javascript" src="/js/bootstrap.js"></script>
+</body>
+</html>

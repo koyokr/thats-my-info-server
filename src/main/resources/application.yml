@@ -1,0 +1,56 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        show_sql: true
+    open-in-view: true
+
+  mustache:
+    suffix: .html
+    cache: false
+
+  http:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+  boot:
+    admin:
+      client:
+        url: ${HEROKU_URL}
+        instance:
+          service-base-url: ${SERVICE_BASE_URL}
+          metadata:
+            user:
+              name: ${SECURITY_USERNAME}
+              password: ${SECURITY_PASSWORD}
+        username: ${HEROKU_USERNAME}
+        password: ${HEROKU_PASSWORD}
+
+  security:
+    user:
+      name: ${SECURITY_USERNAME}
+      password: ${SECURITY_PASSWORD_ENCODED}
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  info:
+    git:
+      mode: full
